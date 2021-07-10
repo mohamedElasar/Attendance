@@ -64,6 +64,8 @@ class _Login_FormState extends State<Login_Form> {
               borderRadius: BorderRadius.circular(20),
             ),
             child: TextFormField(
+              textAlign: TextAlign.left,
+              textDirection: TextDirection.ltr,
               onEditingComplete: () => myFocusNode.requestFocus(),
               onSaved: (value) {
                 _authData['Username'] = value!;
@@ -95,6 +97,8 @@ class _Login_FormState extends State<Login_Form> {
               borderRadius: BorderRadius.circular(20),
             ),
             child: TextFormField(
+              textAlign: TextAlign.left,
+              textDirection: TextDirection.ltr,
               focusNode: myFocusNode,
               onSaved: (value) {
                 _authData['password'] = value!;
@@ -119,7 +123,7 @@ class _Login_FormState extends State<Login_Form> {
               padding: EdgeInsets.symmetric(horizontal: 100),
               child: Container(
                 child: CheckboxListTile(
-                  title: Text('Remember Me ?'),
+                  title: Text('? Remember Me'),
                   value: _rememberme,
                   onChanged: (newval) {
                     setState(() {
