@@ -7,7 +7,7 @@ class Student_Top_Page extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: Colors.white,
-      height: size.height * .12,
+      height: size.height * .1,
       width: size.width,
       padding: EdgeInsets.symmetric(horizontal: 20),
       alignment: Alignment.center,
@@ -27,7 +27,7 @@ class Student_Top_Page extends StatelessWidget {
                 child: Container(
                   // margin: EdgeInsets.symmetric(horizontal: 5),
                   padding: EdgeInsets.symmetric(horizontal: 20),
-                  height: 40,
+                  height: size.height * .05,
                   // width: 300,
                   decoration: BoxDecoration(
                     color: Colors.white,
