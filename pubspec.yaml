@@ -34,6 +34,8 @@ dependencies:
   data_table_2: ^2.0.4
   intl: ^0.17.0
   smart_select: ^4.3.2
+  provider: ^5.0.0
+
 
 dev_dependencies:
   flutter_test:

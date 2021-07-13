@@ -1,3 +1,4 @@
+import 'package:attendance/navigation/screens.dart';
 import 'package:attendance/screens/Admin_Login/components/Login_Form.dart';
 import 'package:flutter/material.dart';
 import '../../constants.dart';
@@ -5,6 +6,14 @@ import 'components/Register_form.dart';
 import 'components/title_with_register.dart';
 
 class Student_Register_Screen extends StatelessWidget {
+  static MaterialPage page() {
+    return MaterialPage(
+      name: Attendance_Screens.student_registerpath,
+      key: ValueKey(Attendance_Screens.student_registerpath),
+      child: const Student_Register_Screen(),
+    );
+  }
+
   const Student_Register_Screen({Key? key}) : super(key: key);
 
   Widget build(BuildContext context) {

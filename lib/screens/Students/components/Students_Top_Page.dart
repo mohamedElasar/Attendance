@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 class Student_Top_Page extends StatelessWidget {
-  const Student_Top_Page({Key? key, required this.size}) : super(key: key);
+  const Student_Top_Page({Key? key, required this.size, this.arrowback = true})
+      : super(key: key);
   final Size size;
+  final bool arrowback;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -61,12 +63,14 @@ class Student_Top_Page extends StatelessWidget {
                 ),
               ),
               SizedBox(width: 5),
-              RotatedBox(
-                quarterTurns: 2,
-                child: Icon(
-                  Icons.arrow_back,
-                ),
-              ),
+              arrowback
+                  ? RotatedBox(
+                      quarterTurns: 2,
+                      child: Icon(
+                        Icons.arrow_back,
+                      ),
+                    )
+                  : Container(),
             ],
           ),
         ],

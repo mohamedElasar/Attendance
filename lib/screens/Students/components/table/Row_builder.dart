@@ -1,16 +1,44 @@
 import 'package:flutter/material.dart';
 
-class Rows_Builder extends StatelessWidget {
+class Rows_Builder extends StatefulWidget {
   final size;
 
-  const Rows_Builder({Key? key, this.size}) : super(key: key);
+  Rows_Builder({Key? key, this.size}) : super(key: key);
+
+  @override
+  _Rows_BuilderState createState() => _Rows_BuilderState();
+}
+
+class _Rows_BuilderState extends State<Rows_Builder> {
+  List<dynamic> mylist = [
+    [false, 'A', 'B', 'C'],
+    [false, 'D', 'E', 'F'],
+    [false, 'D', 'E', 'F'],
+    [false, 'D', 'E', 'F'],
+    [false, 'D', 'E', 'F'],
+  ];
+  void _myfunction(index) {
+    setState(() {
+      mylist[index][0] = !mylist[index][0];
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    print(mylist);
     return Expanded(
       child: ListView.builder(
-        itemCount: 20,
+        itemCount: mylist.length,
         itemBuilder: (BuildContext context, int index) {
-          return TABLE_ROW(size: size);
+          return GestureDetector(
+            child: TABLE_ROW(
+                size: widget.size,
+                name: mylist[index][1],
+                id: mylist[index][2],
+                mobile: mylist[index][3],
+                check: mylist[index][0],
+                myfnc: () => _myfunction(index)),
+          );
         },
       ),
     );
@@ -18,8 +46,22 @@ class Rows_Builder extends StatelessWidget {
 }
 
 class TABLE_ROW extends StatelessWidget {
-  const TABLE_ROW({Key? key, required this.size}) : super(key: key);
+  const TABLE_ROW(
+      {Key? key,
+      required this.size,
+      this.check = false,
+      required this.name,
+      required this.id,
+      required this.mobile,
+      required this.myfnc})
+      : super(key: key);
   final size;
+  final bool check;
+  final String name;
+  final String id;
+  final String mobile;
+  final VoidCallback myfnc;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -29,11 +71,16 @@ class TABLE_ROW extends StatelessWidget {
       child: Row(
         children: [
           Spacer(),
-          Round_CheckBox(height: 30, width: size.width / 8),
+          Round_check_box(
+            height: 30,
+            width: size.width / 8,
+            check: check,
+            fnc: myfnc,
+          ),
           // CELL_Checkbox(height: 30, width: size.width / 8),
-          CELL(height: 30, width: size.width / 3, text: 'محمد أحمد'),
-          CELL(height: 30, width: size.width / 6, text: 'A123'),
-          CELL(height: 30, width: size.width / 5, text: '0101123'),
+          CELL(height: 30, width: size.width / 3, text: name),
+          CELL(height: 30, width: size.width / 6, text: id),
+          CELL(height: 30, width: size.width / 5, text: mobile),
           Phone_Icon(height: 30, width: size.width / 7),
           Spacer(),
         ],
@@ -43,9 +90,12 @@ class TABLE_ROW extends StatelessWidget {
 }
 
 class CELL extends StatelessWidget {
-  const CELL(
-      {Key? key, required this.width, required this.height, required this.text})
-      : super(key: key);
+  const CELL({
+    Key? key,
+    required this.width,
+    required this.height,
+    required this.text,
+  }) : super(key: key);
   final double width;
   final double height;
   final text;
@@ -112,35 +162,73 @@ class Phone_Icon extends StatelessWidget {
   }
 }
 
-class Round_CheckBox extends StatefulWidget {
-  const Round_CheckBox({Key? key, required this.width, required this.height})
-      : super(key: key);
+// class Round_CheckBox extends StatefulWidget {
+//   const Round_CheckBox(
+//       {Key? key,
+//       required this.width,
+//       required this.height,
+//       required this.check})
+//       : super(key: key);
 
-  @override
-  _Round_CheckBoxState createState() => _Round_CheckBoxState();
+//   @override
+//   _Round_CheckBoxState createState() => _Round_CheckBoxState();
+//   final double width;
+//   final double height;
+//   final bool check;
+// }
+
+// class _Round_CheckBoxState extends State<Round_CheckBox> {
+//   bool _value = widget.check;
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return InkWell(
+//       onTap: () {
+//         setState(() {
+//           _value = !_value;
+//         });
+//       },
+//       child: Container(
+//         width: widget.width,
+//         height: widget.height,
+//         decoration: BoxDecoration(border: Border.all(width: 1)),
+//         child: Container(
+//           decoration: BoxDecoration(
+//             shape: BoxShape.circle,
+//             color: _value ? Colors.orange[300] : Colors.orange[100],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+class Round_check_box extends StatelessWidget {
+  const Round_check_box({
+    Key? key,
+    required this.width,
+    required this.height,
+    required this.check,
+    required this.fnc,
+  }) : super(key: key);
+
   final double width;
   final double height;
-}
-
-class _Round_CheckBoxState extends State<Round_CheckBox> {
-  bool _value = true;
+  final bool check;
+  final VoidCallback fnc;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {
-        setState(() {
-          _value = !_value;
-        });
-      },
+      onTap: fnc,
       child: Container(
-        width: widget.width,
-        height: widget.height,
+        width: width,
+        height: height,
         decoration: BoxDecoration(border: Border.all(width: 1)),
         child: Container(
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: _value ? Colors.orange[300] : Colors.orange[100],
+            color: check ? Colors.orange[300] : Colors.orange[100],
           ),
         ),
       ),

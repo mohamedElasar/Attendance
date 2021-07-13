@@ -1,4 +1,6 @@
+import 'package:attendance/managers/App_State_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../constants.dart';
 
@@ -41,9 +43,9 @@ class _Login_FormState extends State<Login_Form> {
       return;
     }
     _formKey.currentState!.save();
-    setState(() {
-      _isLoading = true;
-    });
+    // setState(() {
+    //   _isLoading = true;
+    // });
     // log user in
   }
 
@@ -156,7 +158,10 @@ class _Login_FormState extends State<Login_Form> {
                   ),
                 ),
               ),
-              onPressed: _submit,
+              onPressed: () async {
+                Provider.of<AppStateManager>(context, listen: false)
+                    .login('mockUsername', 'mockPassword');
+              },
             )
         ],
       ),
