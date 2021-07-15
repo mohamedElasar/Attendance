@@ -16,6 +16,19 @@ class group_form extends StatefulWidget {
 
 class _group_formState extends State<group_form> {
   final GlobalKey<FormState> _formKey = GlobalKey();
+
+  void _submit() {
+    final isValid = _formKey.currentState!.validate();
+    if (!isValid) {
+      return;
+    }
+  }
+
+  //  _formKey.currentState.save();
+  //    Navigator.push(
+  //   context,
+  //   MaterialPageRoute(builder: (context) => Home()),);
+
   var _isLoading = false;
   Map<String, dynamic> _register_data = {
     'name': '',
@@ -61,10 +74,30 @@ class _group_formState extends State<group_form> {
     }
   }
 
+  var nameController = TextEditingController();
+  var subjectController = TextEditingController();
+  var teacherController = TextEditingController();
+  var yearController = TextEditingController();
+  var dateController = TextEditingController();
+
+    DateTime selectedDate = DateTime.now();
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: selectedDate,
+        firstDate: DateTime(2021, 7),
+        lastDate: DateTime(2050));
+    if (picked != null && picked != selectedDate)
+      setState(() {
+        selectedDate = picked;
+      });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: widget.size.height * .8,
+      height: widget.size.height * .9,
       width: widget.size.width,
       child: Form(
         key: _formKey,
@@ -79,9 +112,10 @@ class _group_formState extends State<group_form> {
                     height: 5,
                   ),
                   build_edit_field(
-                    item: 'name',
-                    hint: 'الاسم',
-                  ),
+                      item: 'name',
+                      hint: 'الاسم',
+                      inputType: TextInputType.name,
+                      controller: nameController),
                   Center(
                     child: Container(
                       alignment: Alignment.centerRight,
@@ -198,7 +232,27 @@ class _group_formState extends State<group_form> {
               ),
             ),
             SizedBox(
-              height: 20,
+              height: 10,
+            ),
+           
+
+              Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            // Text("${selectedDate.toLocal()}".split(' ')[0]),
+            // SizedBox(height: 20.0,),
+            RaisedButton(
+              onPressed: () => _selectDate(context),
+              child: Text('From .. To'),
+              color: Colors.white,
+              
+            ),
+          ],
+        ),
+      ),
+            SizedBox(
+              height: 10,
             ),
             Expanded(
               child: Column(
@@ -371,8 +425,17 @@ class _group_formState extends State<group_form> {
     );
   }
 
-  Center build_edit_field(
-      {required String item, required String hint, bool small = false}) {
+  Center build_edit_field({
+    required String item,
+    required String hint,
+    bool small = false,
+    required TextEditingController controller,
+    required TextInputType inputType,
+    // Function? on_tap,
+    
+    
+    // String Function(String)? validate,
+  }) {
     return Center(
       child: Container(
         alignment: Alignment.centerRight,
@@ -389,7 +452,11 @@ class _group_formState extends State<group_form> {
             onSaved: (value) {
               _register_data[item] = value!;
             },
-            keyboardType: TextInputType.text,
+            // onTap: on_tap,
+            
+            keyboardType: inputType,
+            controller: controller,
+            // validator:validate ,
             onChanged: (value) {},
             decoration: InputDecoration(
               hintText: hint,
