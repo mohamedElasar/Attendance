@@ -1,4 +1,6 @@
+import 'package:attendance/managers/App_State_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class Rows_Builder extends StatefulWidget {
   final size;
@@ -23,6 +25,11 @@ class _Rows_BuilderState extends State<Rows_Builder> {
     });
   }
 
+  void _tapFnc() {
+    Provider.of<AppStateManager>(context, listen: false)
+        .goToSingleStudent(true);
+  }
+
   @override
   Widget build(BuildContext context) {
     print(mylist);
@@ -32,12 +39,14 @@ class _Rows_BuilderState extends State<Rows_Builder> {
         itemBuilder: (BuildContext context, int index) {
           return GestureDetector(
             child: TABLE_ROW(
-                size: widget.size,
-                name: mylist[index][1],
-                id: mylist[index][2],
-                mobile: mylist[index][3],
-                check: mylist[index][0],
-                myfnc: () => _myfunction(index)),
+              size: widget.size,
+              name: mylist[index][1],
+              id: mylist[index][2],
+              mobile: mylist[index][3],
+              check: mylist[index][0],
+              myfnc: () => _myfunction(index),
+              tapFnc: () => _tapFnc(),
+            ),
           );
         },
       ),
@@ -46,21 +55,23 @@ class _Rows_BuilderState extends State<Rows_Builder> {
 }
 
 class TABLE_ROW extends StatelessWidget {
-  const TABLE_ROW(
-      {Key? key,
-      required this.size,
-      this.check = false,
-      required this.name,
-      required this.id,
-      required this.mobile,
-      required this.myfnc})
-      : super(key: key);
+  const TABLE_ROW({
+    Key? key,
+    required this.size,
+    this.check = false,
+    required this.name,
+    required this.id,
+    required this.mobile,
+    required this.myfnc,
+    required this.tapFnc,
+  }) : super(key: key);
   final size;
   final bool check;
   final String name;
   final String id;
   final String mobile;
   final VoidCallback myfnc;
+  final VoidCallback tapFnc;
 
   @override
   Widget build(BuildContext context) {
@@ -77,8 +88,9 @@ class TABLE_ROW extends StatelessWidget {
             check: check,
             fnc: myfnc,
           ),
-          // CELL_Checkbox(height: 30, width: size.width / 8),
-          CELL(height: 30, width: size.width / 3, text: name),
+          InkWell(
+              onTap: tapFnc,
+              child: CELL(height: 30, width: size.width / 3, text: name)),
           CELL(height: 30, width: size.width / 6, text: id),
           CELL(height: 30, width: size.width / 5, text: mobile),
           Phone_Icon(height: 30, width: size.width / 7),

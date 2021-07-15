@@ -1,4 +1,6 @@
+import 'package:attendance/managers/Auth_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class Student_Top_Page extends StatelessWidget {
   const Student_Top_Page({Key? key, required this.size, this.arrowback = true})
@@ -20,9 +22,14 @@ class Student_Top_Page extends StatelessWidget {
           ),
           Row(
             children: [
-              Icon(
-                Icons.menu,
-                size: 30,
+              InkWell(
+                onTap: () {
+                  Provider.of<Auth_manager>(context, listen: false).logout();
+                },
+                child: Icon(
+                  Icons.menu,
+                  size: 30,
+                ),
               ),
               SizedBox(width: 10),
               Expanded(

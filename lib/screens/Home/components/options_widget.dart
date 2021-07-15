@@ -42,7 +42,11 @@ class Options extends StatelessWidget {
                       text: 'بيانات مجموعه'),
                 ),
                 GestureDetector(
-                  onTap: appstatemanager.homeOptions ? () {} : null,
+                  onTap: appstatemanager.homeOptions
+                      ? () async {
+                          appstatemanager.modifyLesson();
+                        }
+                      : null,
                   child: Chip_Container(
                     size: size,
                     active: appstatemanager.homeOptions ? true : false,

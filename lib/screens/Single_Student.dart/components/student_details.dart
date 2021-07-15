@@ -1,6 +1,8 @@
 import 'package:attendance/constants.dart';
+import 'package:attendance/managers/App_State_manager.dart';
 import 'package:attendance/screens/Single_Student.dart/components/name_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'contacts_widget.dart';
 
@@ -33,10 +35,6 @@ class Student_details extends StatelessWidget {
                       width: double.infinity,
                       decoration: BoxDecoration(
                         color: kbackgroundColor1,
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(20),
-                          topLeft: Radius.circular(20),
-                        ),
                       ),
                       child: Center(
                         child: Text(
@@ -51,30 +49,36 @@ class Student_details extends StatelessWidget {
                     Expanded(
                         child: ListView.builder(
                       itemCount: teachers_Student.length,
-                      itemBuilder: (context, index) => ListTile(
-                        trailing: Text(
-                          'سنتر الياسمين 1:30',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontFamily: 'GE-light',
+                      itemBuilder: (context, index) => InkWell(
+                        onTap: () {
+                          Provider.of<AppStateManager>(context, listen: false)
+                              .goToSingleStudentAttend(true);
+                        },
+                        child: ListTile(
+                          trailing: Text(
+                            'سنتر الياسمين 1:30',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontFamily: 'GE-light',
+                            ),
                           ),
-                        ),
-                        subtitle: Text(
-                          'مدرس لغه عربيه',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontFamily: 'GE-light',
+                          subtitle: Text(
+                            'مدرس لغه عربيه',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontFamily: 'GE-light',
+                            ),
                           ),
-                        ),
-                        leading: CircleAvatar(
-                          backgroundColor: kbackgroundColor3,
-                          radius: 10,
-                        ),
-                        title: Text(
-                          '${teachers_Student[index]}',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontFamily: 'GE-bold',
+                          leading: CircleAvatar(
+                            backgroundColor: kbackgroundColor3,
+                            radius: 10,
+                          ),
+                          title: Text(
+                            '${teachers_Student[index]}',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontFamily: 'GE-bold',
+                            ),
                           ),
                         ),
                       ),
