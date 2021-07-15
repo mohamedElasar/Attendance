@@ -18,16 +18,13 @@ class Filter_Container extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Filter_Chip(
-                title: 'غياب',
+                title: 'اتصال طالب',
               ),
               Filter_Chip(
-                title: 'درجات',
+                title: 'رساله لطالب',
               ),
               Filter_Chip(
-                title: 'تعويضات',
-              ),
-              Filter_Chip(
-                title: 'متوسطات',
+                title: 'اشعار لطالب',
               ),
             ],
           ),
@@ -35,16 +32,24 @@ class Filter_Container extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Filter_Chip(
-                title: 'خصومات',
+                title: 'اتصال ولى أمر',
               ),
               Filter_Chip(
-                title: 'ملاحظات',
+                title: 'رساله لولى الامر',
               ),
               Filter_Chip(
-                title: 'شحن حصص',
+                title: 'اشعار لولى الامر',
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Filter_Chip(
+                title: 'whatsapp الى طالب',
               ),
               Filter_Chip(
-                title: 'بونص',
+                title: 'whatsapp الى ولى الامر',
               ),
             ],
           ),
@@ -63,14 +68,15 @@ class Filter_Chip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return Chip(
-      backgroundColor: kbuttonColor3.withOpacity(.8),
+      backgroundColor: kbackgroundColor3,
       label: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 3),
         child: Container(
           child: Text(
             title,
-            style: TextStyle(fontSize: 16, fontFamily: 'GE-light'),
+            style: TextStyle(fontSize: 14, fontFamily: 'GE-medium'),
           ),
         ),
       ),

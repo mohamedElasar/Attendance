@@ -1,3 +1,4 @@
+import 'package:attendance/navigation/screens.dart';
 import 'package:attendance/screens/Admin_Login/components/Login_Form.dart';
 import 'package:attendance/screens/Admin_Login/components/Page_Title.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,14 @@ import 'components/table/Row_builder.dart';
 import 'components/table/table_head.dart';
 
 class Students_Screen extends StatelessWidget {
+  static MaterialPage page() {
+    return MaterialPage(
+      name: Attendance_Screens.data_students,
+      key: ValueKey(Attendance_Screens.data_students),
+      child: const Students_Screen(),
+    );
+  }
+
   const Students_Screen({Key? key}) : super(key: key);
 
   Widget build(BuildContext context) {
@@ -26,7 +35,10 @@ class Students_Screen extends StatelessWidget {
             Filter_Container(),
             Expanded(
               child: Column(
-                children: [TABLE_HEAD(size: size), Rows_Builder(size: size)],
+                children: [
+                  TABLE_HEAD(size: size),
+                  Rows_Builder(size: size),
+                ],
               ),
             ),
           ],

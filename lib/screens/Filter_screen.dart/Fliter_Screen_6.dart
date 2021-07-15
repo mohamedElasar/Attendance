@@ -1,9 +1,18 @@
 import 'package:attendance/constants.dart';
+import 'package:attendance/navigation/screens.dart';
 import 'package:attendance/screens/Filter_screen.dart/components/filters_top.dart';
 import 'package:attendance/screens/Students/components/Students_Top_Page.dart';
 import 'package:flutter/material.dart';
 
 class Filter_Screen_6 extends StatelessWidget {
+  static MaterialPage page() {
+    return MaterialPage(
+      name: Attendance_Screens.data_students,
+      key: ValueKey(Attendance_Screens.data_students),
+      child: const Filter_Screen_6(),
+    );
+  }
+
   const Filter_Screen_6({Key? key}) : super(key: key);
 
   @override
