@@ -1,4 +1,6 @@
+import 'package:attendance/screens/Add_academic_year/Academic_year.dart';
 import 'package:attendance/screens/Add_group/Add_group_Screen.dart';
+import 'package:attendance/screens/Add_subject/Academic_subject.dart';
 import 'package:attendance/screens/Filter_screen.dart/Fliter_Screen_6.dart';
 import 'package:attendance/screens/Single_Student.dart/Single_Student_Screen.dart';
 import 'package:attendance/screens/degrees/Degrees_Screen.dart';
@@ -31,7 +33,9 @@ class MyApp extends StatelessWidget {
         locale: Locale("ar", "AE"),
         debugShowCheckedModeBanner: false,
         title: 'حضور',
-        theme: ThemeData(),
-        home: Degrees_Screen());
+        theme: ThemeData(
+          floatingActionButtonTheme: FloatingActionButtonThemeData(backgroundColor: Colors.deepOrange[100]),
+        ),
+        home: Add_academic_subject());
   }
 }
