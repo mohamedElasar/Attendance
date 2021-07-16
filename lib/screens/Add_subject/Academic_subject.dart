@@ -6,7 +6,7 @@ import 'package:attendance/screens/degrees/components/Degrees_top.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_select/smart_select.dart';
 import '../../constants.dart';
-import 'package:attendance/screens/degrees/components/check_box.dart';
+
 import 'package:searchable_dropdown/searchable_dropdown.dart';
 
 import 'components/default_form_field.dart';
