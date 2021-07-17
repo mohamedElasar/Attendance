@@ -1,7 +1,16 @@
+import 'package:attendance/navigation/screens.dart';
 import 'package:attendance/screens/Add_teacher/components/Teacher_Form.dart';
 import 'package:flutter/material.dart';
 
 class Add_Teacher_Screeen extends StatelessWidget {
+  static MaterialPage page() {
+    return MaterialPage(
+      name: Attendance_Screens.teacher_registerpath,
+      key: ValueKey(Attendance_Screens.teacher_registerpath),
+      child: const Add_Teacher_Screeen(),
+    );
+  }
+
   const Add_Teacher_Screeen({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {

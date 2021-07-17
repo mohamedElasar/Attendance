@@ -1,8 +1,17 @@
+import 'package:attendance/navigation/screens.dart';
 import 'package:attendance/screens/Add_group/components/group_form.dart';
 import 'package:attendance/screens/Add_teacher/components/Teacher_Form.dart';
 import 'package:flutter/material.dart';
 
 class Add_group_screen extends StatelessWidget {
+  static MaterialPage page() {
+    return MaterialPage(
+      name: Attendance_Screens.group_registerpath,
+      key: ValueKey(Attendance_Screens.group_registerpath),
+      child: const Add_group_screen(),
+    );
+  }
+
   const Add_group_screen({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {

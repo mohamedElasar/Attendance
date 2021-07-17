@@ -16,7 +16,8 @@ class TABLE_HEAD extends StatelessWidget {
           CELL(height: 30, width: size.width / 3, text: 'الاسم'),
           CELL(height: 30, width: size.width / 6, text: 'ID'),
           CELL(height: 30, width: size.width / 5, text: 'الموبايل'),
-          Comm_Options(height: 30, width: size.width / 7, text: 'تواصل'),
+          CELL(height: 30, width: size.width / 7, text: 'تواصل'),
+          // Comm_Options(height: 30, width: size.width / 7, text: 'تواصل'),
           Spacer(),
         ],
       ),
@@ -33,7 +34,7 @@ class CELL extends StatelessWidget {
   final text;
   @override
   Widget build(BuildContext context) {
-    const textStyle = TextStyle(fontSize: 18, fontFamily: 'GE-bold');
+    const textStyle = TextStyle(fontSize: 18, fontFamily: 'GE-medium');
     return Container(
       width: width,
       height: height,
