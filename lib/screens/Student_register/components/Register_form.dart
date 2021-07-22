@@ -88,11 +88,9 @@ class _Register_FormState extends State<Register_Form> {
         _groups_shown = [];
       }).then((value) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 backgroundColor: Colors.green[300],
-                content: Center(
-                  child: Text(
-                    'تم اضافه الطالب بنجاح',
-                    style: TextStyle(fontFamily: 'GE-medium'),
-                  ),
+                content: Text(
+                  'تم اضافه الطالب بنجاح',
+                  style: TextStyle(fontFamily: 'GE-medium'),
                 ),
                 duration: Duration(seconds: 3),
               )));
@@ -454,6 +452,38 @@ class _Register_FormState extends State<Register_Form> {
   ScrollController _sc2 = new ScrollController();
   @override
   void dispose() {
+    _isLoading = false;
+    nameController.dispose();
+    parentNameController.dispose();
+    relationController.dispose();
+    parentPhoneController.dispose();
+    parentWhatsController.dispose();
+    schoolController.dispose();
+    barCodeController.dispose();
+    groupController.dispose();
+    discountController.dispose();
+    languageController.dispose();
+    notesController.dispose();
+    emailController.dispose();
+    studyTypeController.dispose();
+    phonecontroller.dispose();
+    passwordcontroller.dispose();
+    confirmpasswordController.dispose();
+    parentphoneController.dispose();
+    focus1.dispose();
+    focus2.dispose();
+    focus3.dispose();
+    focus4.dispose();
+    focus5.dispose();
+    focus6.dispose();
+    focus7.dispose();
+    focus8.dispose();
+    focus9.dispose();
+    focus10.dispose();
+    focus11.dispose();
+    focus12.dispose();
+    focus13.dispose();
+    focus14.dispose();
     _sc.dispose();
     _sc2.dispose();
 
@@ -907,16 +937,19 @@ class _Register_FormState extends State<Register_Form> {
                         }
                       },
                       focus: focus14),
-                  TextButton(
-                    style: ButtonStyle(
-                        elevation: MaterialStateProperty.all(2),
-                        backgroundColor:
-                            MaterialStateProperty.all(kbackgroundColor1)),
-                    onPressed: _submit,
-                    child: Text(
-                      'تسجيل',
-                      style:
-                          TextStyle(fontFamily: 'GE-Bold', color: Colors.black),
+                  Container(
+                    width: widget.size.width * .9,
+                    child: TextButton(
+                      style: ButtonStyle(
+                          elevation: MaterialStateProperty.all(2),
+                          backgroundColor:
+                              MaterialStateProperty.all(kbuttonColor2)),
+                      onPressed: _submit,
+                      child: Text(
+                        'تسجيل',
+                        style: TextStyle(
+                            fontFamily: 'GE-Bold', color: Colors.black),
+                      ),
                     ),
                   )
                 ],

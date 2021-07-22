@@ -1,7 +1,9 @@
+import 'package:attendance/managers/App_State_manager.dart';
 import 'package:attendance/navigation/screens.dart';
 import 'package:attendance/screens/Add_group/components/group_form.dart';
 import 'package:attendance/screens/Add_teacher/components/Teacher_Form.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class Add_group_screen extends StatelessWidget {
   static MaterialPage page() {
@@ -35,15 +37,19 @@ class Add_group_screen extends StatelessWidget {
             backgroundImage: AssetImage('assets/images/Group.png'),
           ),
           SizedBox(
-            width: 50,
+            width: 30,
           ),
-          Icon(
-            Icons.save_rounded,
-            color: Colors.orange[200],
-            size: 40,
-          ),
-          SizedBox(
-            width: 20,
+          InkWell(
+            onTap: () {
+              Provider.of<AppStateManager>(context, listen: false).go_to_Home();
+            },
+            child: RotatedBox(
+              quarterTurns: 2,
+              child: Icon(
+                Icons.arrow_back,
+                color: Colors.black,
+              ),
+            ),
           )
         ],
         elevation: 0,

@@ -69,8 +69,8 @@ class YearManager extends ChangeNotifier {
       // add exception
 
     } catch (error) {
-      print('error years');
-      print(error);
+      throw (error);
+      // print(error);
     }
 
     notifyListeners();
@@ -109,6 +109,7 @@ class YearManager extends ChangeNotifier {
   }
 
   void resetlist() {
+    _years = [];
     _loading = true;
     _pageNumber = 1;
     _error = false;

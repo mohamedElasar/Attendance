@@ -17,6 +17,17 @@ class TeacherManager extends ChangeNotifier {
   String? _authToken;
   List<TeacherModel> _teachers = [];
   List<TeacherModel> get teachers => _teachers;
+  get hasmore => _hasMore;
+  get pageNumber => _pageNumber;
+  get error => _error;
+  get loading => _loading;
+
+  bool _hasMore = false;
+  int _pageNumber = 1;
+  bool _error = false;
+  bool _loading = true;
+
+  final int _defaultPerPageCount = 15;
 
   Future<void> add_teacher(
     String? name,
@@ -97,6 +108,55 @@ class TeacherManager extends ChangeNotifier {
       print(error);
     }
 
+    notifyListeners();
+  }
+
+  Future<void> getMoreData() async {
+    try {
+      var url = Uri.https('development.mrsaidmostafa.com', '/api/teachers',
+          {"page": _pageNumber.toString()});
+      var response = await http.get(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          HttpHeaders.authorizationHeader: 'Bearer $_authToken'
+        },
+      );
+
+      final responseData = json.decode(response.body);
+
+      List<dynamic> yearsList = responseData['data'];
+      var fetched =
+          yearsList.map((data) => TeacherModel.fromJson(data)).toList();
+      _hasMore = fetched.length == _defaultPerPageCount;
+      _loading = false;
+      _pageNumber = _pageNumber + 1;
+
+      _teachers.addAll(fetched);
+    } catch (e) {
+      _loading = false;
+      _error = true;
+      notifyListeners();
+    }
+
+    notifyListeners();
+  }
+
+  void resetlist() {
+    _teachers = [];
+    _loading = true;
+    _pageNumber = 1;
+    _error = false;
+    _loading = true;
+  }
+
+  void setloading(bool value) {
+    _loading = value;
+    notifyListeners();
+  }
+
+  void seterror(bool value) {
+    _error = value;
     notifyListeners();
   }
 }

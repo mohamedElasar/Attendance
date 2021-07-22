@@ -111,6 +111,7 @@ class SubjectManager extends ChangeNotifier {
   }
 
   void resetlist() {
+    _subjects = [];
     _loading = true;
     _pageNumber = 1;
     _error = false;

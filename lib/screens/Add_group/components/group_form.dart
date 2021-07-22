@@ -41,9 +41,9 @@ class _group_formState extends State<group_form> {
 
     Provider.of<GroupManager>(context, listen: false).add_group(
         nameController.text,
-        _year_id.toString(),
-        _subject_id.toString(),
-        _teacher_id.toString(),
+        year_id_selected,
+        subjectId_selected,
+        teacher_id_selected,
         'Sunday',
         '11:00');
     setState(() {
@@ -81,14 +81,6 @@ class _group_formState extends State<group_form> {
     TimeOfDay.now(),
     TimeOfDay.now(),
   ];
-  // DateTime? myTime1 = null;
-  // DateTime? myTime2 = null;
-  // DateTime? myTime3 = null;
-  // DateTime? myTime4 = null;
-  // DateTime? myTime5 = null;
-  // DateTime? myTime6 = null;
-  // DateTime? myTime7 = null;
-  // DateTime? myTime8 = null;
 
   TimeOfDay _time = TimeOfDay(hour: 7, minute: 15);
 
@@ -104,11 +96,17 @@ class _group_formState extends State<group_form> {
     }
   }
 
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _sc.dispose();
+    _sc2.dispose();
+    _sc3.dispose();
+
+    super.dispose();
+  }
+
   var nameController = TextEditingController();
-  // var subjectController = TextEditingController();
-  // var teacherController = TextEditingController();
-  // var yearController = TextEditingController();
-  // var dateController = TextEditingController();
 
   DateTime selectedDate = DateTime.now();
 
@@ -124,33 +122,412 @@ class _group_formState extends State<group_form> {
       });
   }
 
-  var _isInit = true;
   @override
-  void didChangeDependencies() {
-    if (_isInit) {
-      setState(() {
-        _isLoading = true;
-      });
+  void initState() {
+    super.initState();
+
+    Future.delayed(Duration.zero, () {
+      Provider.of<SubjectManager>(context, listen: false).resetlist();
+      Provider.of<YearManager>(context, listen: false).resetlist();
+      Provider.of<TeacherManager>(context, listen: false).resetlist();
 
       Provider.of<SubjectManager>(context, listen: false)
-          .get_subjects()
+          .getMoreData()
           .then((_) =>
-              Provider.of<YearManager>(context, listen: false).get_years())
-          .then((value) => Provider.of<TeacherManager>(context, listen: false)
-              .get_teachers())
+              Provider.of<YearManager>(context, listen: false).getMoreData())
+          .then((_) =>
+              Provider.of<TeacherManager>(context, listen: false).getMoreData())
           .then((_) {
         setState(() {
           _isLoading = false;
         });
       });
-    }
-    _isInit = false;
-    super.didChangeDependencies();
+      _sc.addListener(
+        () {
+          if (_sc.position.pixels == _sc.position.maxScrollExtent) {
+            Provider.of<SubjectManager>(context, listen: false).getMoreData();
+          }
+        },
+      );
+      _sc2.addListener(
+        () {
+          if (_sc2.position.pixels == _sc2.position.maxScrollExtent) {
+            Provider.of<YearManager>(context, listen: false).getMoreData();
+          }
+        },
+      );
+      _sc3.addListener(
+        () {
+          if (_sc3.position.pixels == _sc3.position.maxScrollExtent) {
+            Provider.of<TeacherManager>(context, listen: false).getMoreData();
+          }
+        },
+      );
+    });
   }
 
-  late int _subject_id;
-  late int _teacher_id;
-  late int _year_id;
+  late String subjectId_selected;
+  String subjectname = 'الماده الدراسيه';
+  late String teacher_id_selected;
+  String teachername = 'المدرس';
+  late String year_id_selected;
+  String yearname = 'السنه الدراسيه';
+  ScrollController _sc = new ScrollController();
+  ScrollController _sc2 = new ScrollController();
+  ScrollController _sc3 = new ScrollController();
+
+  void _modalBottomSheetMenu(BuildContext context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (builder) {
+          return Container(
+            height: 250.0,
+            color: Colors.transparent,
+            child: Column(
+              children: [
+                Container(
+                  height: 40,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: kbackgroundColor3,
+                  ),
+                  child: Center(
+                    child: Text(
+                      'الماده الدراسيه',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontFamily: 'GE-bold',
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(20.0),
+                            topRight: Radius.circular(20.0))),
+                    child: Consumer<SubjectManager>(
+                      builder: (_, subjectmanager, child) {
+                        if (subjectmanager.subjects.isEmpty) {
+                          if (subjectmanager.loading) {
+                            return Center(
+                                child: Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: CircularProgressIndicator(),
+                            ));
+                          } else if (subjectmanager.error) {
+                            return Center(
+                                child: InkWell(
+                              onTap: () {
+                                subjectmanager.setloading(true);
+                                subjectmanager.seterror(false);
+                                Provider.of<SubjectManager>(context,
+                                        listen: false)
+                                    .getMoreData();
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Text("error please tap to try again"),
+                              ),
+                            ));
+                          }
+                        } else {
+                          return ListView.builder(
+                            controller: _sc,
+                            itemCount: subjectmanager.subjects.length +
+                                (subjectmanager.hasmore ? 1 : 0),
+                            itemBuilder: (BuildContext ctxt, int index) {
+                              if (index == subjectmanager.subjects.length) {
+                                if (subjectmanager.error) {
+                                  return Center(
+                                      child: InkWell(
+                                    onTap: () {
+                                      subjectmanager.setloading(true);
+                                      subjectmanager.seterror(false);
+                                      Provider.of<SubjectManager>(context,
+                                              listen: false)
+                                          .getMoreData();
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16),
+                                      child:
+                                          Text("error please tap to try again"),
+                                    ),
+                                  ));
+                                } else {
+                                  return Center(
+                                      child: Padding(
+                                    padding: const EdgeInsets.all(8),
+                                    child: CircularProgressIndicator(),
+                                  ));
+                                }
+                              }
+
+                              return GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    subjectId_selected = subjectmanager
+                                        .subjects[index].id
+                                        .toString();
+                                    subjectname =
+                                        subjectmanager.subjects[index].name!;
+                                  });
+                                  Navigator.pop(context);
+                                },
+                                child: ListTile(
+                                  title: Text(
+                                      subjectmanager.subjects[index].name!),
+                                ),
+                              );
+                            },
+                          );
+                        }
+                        return Container();
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        });
+  }
+
+  void _modalBottomSheetMenu2(BuildContext context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (builder) {
+          return Container(
+            height: 250.0,
+            color: Colors.transparent,
+            child: Column(
+              children: [
+                Container(
+                  height: 40,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: kbackgroundColor1,
+                  ),
+                  child: Center(
+                    child: Text(
+                      'المرحله الدراسيه',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontFamily: 'GE-bold',
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(20.0),
+                            topRight: Radius.circular(20.0))),
+                    child: Consumer<YearManager>(
+                      builder: (_, yearmanager, child) {
+                        if (yearmanager.years.isEmpty) {
+                          if (yearmanager.loading) {
+                            return Center(
+                                child: Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: CircularProgressIndicator(),
+                            ));
+                          } else if (yearmanager.error) {
+                            return Center(
+                                child: InkWell(
+                              onTap: () {
+                                yearmanager.setloading(true);
+                                yearmanager.seterror(false);
+                                Provider.of<YearManager>(context, listen: false)
+                                    .getMoreData();
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Text("error please tap to try again"),
+                              ),
+                            ));
+                          }
+                        } else {
+                          return ListView.builder(
+                            controller: _sc2,
+                            itemCount: yearmanager.years.length +
+                                (yearmanager.hasmore ? 1 : 0),
+                            itemBuilder: (BuildContext ctxt, int index) {
+                              if (index == yearmanager.years.length) {
+                                if (yearmanager.error) {
+                                  return Center(
+                                      child: InkWell(
+                                    onTap: () {
+                                      yearmanager.setloading(true);
+                                      yearmanager.seterror(false);
+                                      Provider.of<YearManager>(context,
+                                              listen: false)
+                                          .getMoreData();
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16),
+                                      child:
+                                          Text("error please tap to try again"),
+                                    ),
+                                  ));
+                                } else {
+                                  return Center(
+                                      child: Padding(
+                                    padding: const EdgeInsets.all(8),
+                                    child: CircularProgressIndicator(),
+                                  ));
+                                }
+                              }
+
+                              return GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    year_id_selected =
+                                        yearmanager.years[index].id.toString();
+                                    yearname = yearmanager.years[index].name!;
+                                  });
+                                  Navigator.pop(context);
+                                },
+                                child: ListTile(
+                                  title: Text(yearmanager.years[index].name!),
+                                ),
+                              );
+                            },
+                          );
+                        }
+                        return Container();
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        });
+  }
+
+  void _modalBottomSheetMenu3(BuildContext context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (builder) {
+          return Container(
+            height: 250.0,
+            color: Colors.transparent,
+            child: Column(
+              children: [
+                Container(
+                  height: 40,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: kbuttonColor2,
+                  ),
+                  child: Center(
+                    child: Text(
+                      'المدرس',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontFamily: 'GE-bold',
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(20.0),
+                            topRight: Radius.circular(20.0))),
+                    child: Consumer<TeacherManager>(
+                      builder: (_, teachermanager, child) {
+                        if (teachermanager.teachers.isEmpty) {
+                          if (teachermanager.loading) {
+                            return Center(
+                                child: Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: CircularProgressIndicator(),
+                            ));
+                          } else if (teachermanager.error) {
+                            return Center(
+                                child: InkWell(
+                              onTap: () {
+                                teachermanager.setloading(true);
+                                teachermanager.seterror(false);
+                                Provider.of<TeacherManager>(context,
+                                        listen: false)
+                                    .getMoreData();
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Text("error please tap to try again"),
+                              ),
+                            ));
+                          }
+                        } else {
+                          return ListView.builder(
+                            controller: _sc3,
+                            itemCount: teachermanager.teachers.length +
+                                (teachermanager.hasmore ? 1 : 0),
+                            itemBuilder: (BuildContext ctxt, int index) {
+                              if (index == teachermanager.teachers.length) {
+                                if (teachermanager.error) {
+                                  return Center(
+                                      child: InkWell(
+                                    onTap: () {
+                                      teachermanager.setloading(true);
+                                      teachermanager.seterror(false);
+                                      Provider.of<TeacherManager>(context,
+                                              listen: false)
+                                          .getMoreData();
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16),
+                                      child:
+                                          Text("error please tap to try again"),
+                                    ),
+                                  ));
+                                } else {
+                                  return Center(
+                                      child: Padding(
+                                    padding: const EdgeInsets.all(8),
+                                    child: CircularProgressIndicator(),
+                                  ));
+                                }
+                              }
+
+                              return GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    teacher_id_selected = teachermanager
+                                        .teachers[index].id
+                                        .toString();
+                                    teachername =
+                                        teachermanager.teachers[index].name!;
+                                  });
+                                  Navigator.pop(context);
+                                },
+                                child: ListTile(
+                                  title: Text(
+                                      teachermanager.teachers[index].name!),
+                                ),
+                              );
+                            },
+                          );
+                        }
+                        return Container();
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -189,38 +566,18 @@ class _group_formState extends State<group_form> {
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(color: Colors.grey),
                             ),
-                            child: Container(
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton(
-                                  style: TextStyle(
-                                      fontFamily: 'GE-medium',
-                                      color: Colors.black),
-                                  value: _register_data['subject'],
-                                  hint: Text('الماده'),
-                                  isExpanded: true,
-                                  iconSize: 30,
-                                  onChanged: (newval) {
-                                    setState(() {
-                                      _register_data['subject'] =
-                                          newval.toString();
-                                    });
-                                  },
-                                  icon: Icon(Icons.keyboard_arrow_down),
-                                  items: Provider.of<SubjectManager>(context,
-                                          listen: false)
-                                      .subjects
-                                      .map(
-                                        (item) => DropdownMenuItem(
-                                          child: Text(item.name!),
-                                          value: item.name,
-                                          onTap: () {
-                                            setState(() {
-                                              _subject_id = item.id!;
-                                            });
-                                          },
-                                        ),
-                                      )
-                                      .toList(),
+                            child: InkWell(
+                              onTap: () => _modalBottomSheetMenu(context),
+                              child: Container(
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      subjectname,
+                                      style: TextStyle(fontFamily: 'GE-light'),
+                                    ),
+                                    Spacer(),
+                                    Icon(Icons.keyboard_arrow_down)
+                                  ],
                                 ),
                               ),
                             ),
@@ -237,38 +594,18 @@ class _group_formState extends State<group_form> {
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(color: Colors.grey),
                             ),
-                            child: Container(
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton(
-                                  style: TextStyle(
-                                      fontFamily: 'GE-medium',
-                                      color: Colors.black),
-                                  value: _register_data['teacher'],
-                                  hint: Text('المدرس'),
-                                  isExpanded: true,
-                                  iconSize: 30,
-                                  onChanged: (newval) {
-                                    setState(() {
-                                      _register_data['teacher'] =
-                                          newval.toString();
-                                    });
-                                  },
-                                  icon: Icon(Icons.keyboard_arrow_down),
-                                  items: Provider.of<TeacherManager>(context,
-                                          listen: false)
-                                      .teachers
-                                      .map(
-                                        (item) => DropdownMenuItem(
-                                          child: Text(item.name!),
-                                          value: item.name,
-                                          onTap: () {
-                                            setState(() {
-                                              _teacher_id = item.id!;
-                                            });
-                                          },
-                                        ),
-                                      )
-                                      .toList(),
+                            child: InkWell(
+                              onTap: () => _modalBottomSheetMenu3(context),
+                              child: Container(
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      teachername,
+                                      style: TextStyle(fontFamily: 'GE-light'),
+                                    ),
+                                    Spacer(),
+                                    Icon(Icons.keyboard_arrow_down)
+                                  ],
                                 ),
                               ),
                             ),
@@ -285,36 +622,18 @@ class _group_formState extends State<group_form> {
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(color: Colors.grey),
                             ),
-                            child: Container(
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton(
-                                  style: TextStyle(
-                                      fontFamily: 'GE-medium',
-                                      color: Colors.black),
-                                  value: _register_data['year_level'],
-                                  hint: Text('السنه الدراسيه'),
-                                  isExpanded: true,
-                                  iconSize: 30,
-                                  onChanged: (newval) {
-                                    setState(() {
-                                      _register_data['year_level'] =
-                                          newval.toString();
-                                    });
-                                  },
-                                  icon: Icon(Icons.keyboard_arrow_down),
-                                  items: Provider.of<YearManager>(context,
-                                          listen: false)
-                                      .years
-                                      .map((item) => DropdownMenuItem(
-                                            child: Text(item.name!),
-                                            value: item.name,
-                                            onTap: () {
-                                              setState(() {
-                                                _year_id = item.id!;
-                                              });
-                                            },
-                                          ))
-                                      .toList(),
+                            child: InkWell(
+                              onTap: () => _modalBottomSheetMenu2(context),
+                              child: Container(
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      yearname,
+                                      style: TextStyle(fontFamily: 'GE-light'),
+                                    ),
+                                    Spacer(),
+                                    Icon(Icons.keyboard_arrow_down)
+                                  ],
                                 ),
                               ),
                             ),
@@ -533,9 +852,6 @@ class _group_formState extends State<group_form> {
     bool small = false,
     required TextEditingController controller,
     required TextInputType inputType,
-    // Function? on_tap,
-
-    // String Function(String)? validate,
   }) {
     return Center(
       child: Container(

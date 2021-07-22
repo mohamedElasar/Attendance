@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:attendance/helper/httpexception.dart';
 import 'package:attendance/managers/Auth_manager.dart';
 import 'package:attendance/managers/stage_manager.dart';
 import 'package:attendance/managers/year_manager.dart';
@@ -39,7 +40,7 @@ class _Add_academic_yearState extends State<Add_academic_year> {
   String text_value = '';
   Map<String, dynamic> _add_data = {'stage': null, 'id': null};
   var _isInit = true;
-  var _isLoading = false;
+  var _isLoading = true;
   ScrollController _sc = new ScrollController();
 
   @override
@@ -48,6 +49,15 @@ class _Add_academic_yearState extends State<Add_academic_year> {
 
     Future.delayed(Duration.zero, () {
       Provider.of<YearManager>(context, listen: false).resetlist();
+      Provider.of<StageManager>(context, listen: false)
+          .get_stages()
+          .then((value) =>
+              Provider.of<YearManager>(context, listen: false).getMoreData())
+          .then((_) {
+        setState(() {
+          _isLoading = false;
+        });
+      });
       _sc.addListener(() {
         if (_sc.position.pixels == _sc.position.maxScrollExtent) {
           Provider.of<YearManager>(context, listen: false).getMoreData();
@@ -62,77 +72,197 @@ class _Add_academic_yearState extends State<Add_academic_year> {
     super.dispose();
   }
 
-  @override
-  void didChangeDependencies() {
-    if (_isInit) {
-      setState(() {
-        _isLoading = true;
-      });
+  final GlobalKey<FormState> _formKey = GlobalKey();
 
-      Provider.of<StageManager>(context, listen: false)
-          .get_stages()
-          .then((value) =>
-              Provider.of<YearManager>(context, listen: false).getMoreData())
-          .then((_) {
-        setState(() {
-          _isLoading = false;
-        });
-      });
+  void _submit() async {
+    // final isValid = _formKey.currentState!.validate();
+    // if (!isValid) {
+    //   return;
+    // }
+    if (defaultstagename == 'المرحله الدراسيه' || yearController.text == '') {
+      _showErrorDialog('قم بكتابه السنه الدراسيه واختار المرحله الدراسيه');
+      return;
     }
-    _isInit = false;
-    super.didChangeDependencies();
+    _formKey.currentState!.save();
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      await Provider.of<YearManager>(context, listen: false)
+          .add_year(yearController.text, stage_id_selected)
+          .then((_) {
+            _formKey.currentState?.reset();
+            yearController.text = '';
+
+            defaultstagename = 'المرحله الدراسيه';
+          })
+          .then((_) =>
+              Provider.of<YearManager>(context, listen: false).resetlist())
+          .then((_) =>
+              Provider.of<YearManager>(context, listen: false).getMoreData())
+          .then((_) => setState(() {
+                _isLoading = false;
+              }))
+          .then(
+            (_) => ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                backgroundColor: Colors.green[300],
+                content: Text(
+                  'تم اضافه السنه الدراسيه بنجاح',
+                  style: TextStyle(fontFamily: 'GE-medium'),
+                ),
+                duration: Duration(seconds: 3),
+              ),
+            ),
+          );
+    } on HttpException catch (error) {
+      _showErrorDialog(error.toString());
+    } catch (error) {
+      const errorMessage = 'حاول مره اخري';
+      _showErrorDialog(errorMessage);
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          'حدث خطا',
+          style: TextStyle(fontFamily: 'GE-Bold'),
+        ),
+        content: Text(
+          message,
+          style: TextStyle(fontFamily: 'AraHamah1964R-Bold'),
+        ),
+        actions: <Widget>[
+          Center(
+            child: TextButton(
+              style: ButtonStyle(
+                  backgroundColor:
+                      MaterialStateProperty.all(kbackgroundColor1)),
+              // color: kbackgroundColor1,
+              child: Text(
+                'حسنا',
+                style: TextStyle(fontFamily: 'GE-medium', color: Colors.black),
+              ),
+              onPressed: () {
+                Navigator.of(ctx).pop();
+              },
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  var defaultstagename = 'المرحله الدراسيه';
+  late String stage_id_selected;
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
     return SafeArea(
-      child: _isLoading
-          ? Center(
-              child: Splash_Screen(),
-            )
-          : Scaffold(
-              floatingActionButton: FloatingActionButton(
-                onPressed: () {
-                  _add_data['stage'] = null;
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) =>
-                        _buildPopupDialog(context),
-                  );
-                },
+      child: Scaffold(
+        floatingActionButton: _isLoading
+            ? null
+            : FloatingActionButton(
+                onPressed: _submit,
                 child: Icon(Icons.add),
               ),
-              backgroundColor: kbackgroundColor1,
-              body: Column(
-                children: [
-                  Academic_Top_Page(size: size),
-                  Container(
-                    color: Colors.white,
-                    child: Padding(
-                      padding: const EdgeInsetsDirectional.only(top: 50),
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              Provider.of<Auth_manager>(context, listen: false)
-                                  .name,
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 35,
-                                  fontFamily: 'AraHamah1964B-Bold'),
-                            ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                          ],
-                        ),
+        backgroundColor: kbackgroundColor1,
+        body: Column(
+          children: [
+            Academic_Top_Page(size: size),
+            Container(
+              color: Colors.white,
+              child: Padding(
+                padding: const EdgeInsetsDirectional.only(top: 20),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        Provider.of<Auth_manager>(context, listen: false).name,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 35,
+                            fontFamily: 'AraHamah1964B-Bold'),
                       ),
-                    ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        children: [
+                          Form(
+                            key: _formKey,
+                            child: Container(
+                              height: 40,
+                              width: size.width / 2,
+                              child: defaultFormField(
+                                // : ,
+                                text: 'السنة الدراسية',
+                                controller: yearController,
+                                prefix: Icons.calendar_today,
+                                type: TextInputType.name,
+                                validate: (value) {
+                                  if (value.isEmpty) {
+                                    return '*';
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
+                          Center(
+                            child: Container(
+                              alignment: Alignment.centerRight,
+                              width: size.width / 2,
+                              padding: EdgeInsets.symmetric(horizontal: 20),
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                // borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: Colors.grey),
+                              ),
+                              child: Container(
+                                child: InkWell(
+                                  onTap: () => _modalBottomSheetMenu(context),
+                                  child: Container(
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          defaultstagename,
+                                          style:
+                                              TextStyle(fontFamily: 'GE-light'),
+                                        ),
+                                        Spacer(),
+                                        Icon(Icons.keyboard_arrow_down)
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ],
                   ),
-                  Expanded(
+                ),
+              ),
+            ),
+            _isLoading
+                ? Center(
+                    child: Container(
+                      margin: EdgeInsets.all(50),
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                : Expanded(
                     child: Container(
                       margin: const EdgeInsets.symmetric(
                         vertical: 10,
@@ -191,11 +321,6 @@ class _Add_academic_yearState extends State<Add_academic_year> {
                                 itemCount: yearmanager.years.length +
                                     (yearmanager.hasmore ? 1 : 0),
                                 itemBuilder: (BuildContext ctxt, int index) {
-                                  // if (index == yearmanager.years.length - 5) {
-                                  //   Provider.of<YearManager>(context,
-                                  //           listen: false)
-                                  //       .getMoreData();
-                                  // }
                                   if (index == yearmanager.years.length) {
                                     if (yearmanager.error) {
                                       return Center(
@@ -248,120 +373,271 @@ class _Add_academic_yearState extends State<Add_academic_year> {
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
-    );
-  }
-
-  Widget _buildPopupDialog(BuildContext context) {
-    return new AlertDialog(
-      title: const Text('اضافة سنة دراسية'),
-      content: new Container(
-        height: 180,
-        width: 180,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.zero),
-          color: Colors.white,
-        ),
-        child: Column(
-          children: [
-            defaultFormField(
-              text: 'السنة الدراسية',
-              controller: yearController,
-              prefix: Icons.calendar_today,
-              type: TextInputType.name,
-              validate: () {},
-            ),
-            Container(
-              child: StatefulBuilder(
-                builder: (BuildContext context, StateSetter dropDownState) {
-                  return DropdownButtonHideUnderline(
-                    child: DropdownButton(
-                      style: TextStyle(
-                          fontFamily: 'GE-medium', color: Colors.black),
-                      value: _add_data['stage'],
-                      hint: Text('المرحله الدراسية'),
-                      isExpanded: true,
-                      iconSize: 30,
-                      onChanged: (newval) {
-                        // setState(() {
-                        //   _add_data['year'] = newval.toString();
-                        // });
-                        dropDownState(() {
-                          _add_data['stage'] = newval;
-                        });
-                      },
-                      icon: Icon(Icons.keyboard_arrow_down),
-                      items: Provider.of<StageManager>(context, listen: false)
-                          .stages!
-                          .map((item) => DropdownMenuItem(
-                                child: Text(item.name!),
-                                value: item.name!,
-                                onTap: () {
-                                  setState(() {
-                                    _add_data['id'] = item.id;
-                                    // print(_add_data['id']);
-                                  });
-                                },
-                              ))
-                          .toList(),
-                    ),
-                  );
-                },
-              ),
-            ),
-            Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                    style: ElevatedButton.styleFrom(primary: kbackgroundColor1),
-                    onPressed: () {
-                      setState(() {
-                        text_value = yearController.text;
-                      });
-                      if (_add_data['stage'] == null) return;
-                      if (text_value == '') return;
-                      Provider.of<YearManager>(context, listen: false)
-                          .add_year(text_value, _add_data['id']!.toString())
-                          .then((value) => Navigator.of(context).pop())
-                          .then(
-                            (value) => setState(() {
-                              _isInit = true;
-                            }),
-                          )
-                          .then((value) {
-                        Provider.of<YearManager>(context, listen: false)
-                            .resetlist();
-                      });
-                      // litems.add(text_value);
-                      yearController.clear();
-                    },
-                    child: Text(
-                      'اضافة',
-                      style: TextStyle(
-                          color: Colors.black, fontFamily: 'GE-medium'),
-                    )),
-                SizedBox(
-                  width: 20,
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(primary: kbackgroundColor1),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text(
-                    'الغاء',
-                    style:
-                        TextStyle(color: Colors.black, fontFamily: 'GE-medium'),
-                  ),
-                ),
-              ],
-            )
           ],
         ),
       ),
     );
+  }
+
+  // Widget _buildPopupDialog(BuildContext context) {
+  //   return new AlertDialog(
+  //     title: const Text('اضافة سنة دراسية'),
+  //     content: new Container(
+  //       height: 180,
+  //       width: 180,
+  //       decoration: BoxDecoration(
+  //         borderRadius: BorderRadius.all(Radius.zero),
+  //         color: Colors.white,
+  //       ),
+  //       child: Column(
+  //         children: [
+  //           defaultFormField(
+  //             text: 'السنة الدراسية',
+  //             controller: yearController,
+  //             prefix: Icons.calendar_today,
+  //             type: TextInputType.name,
+  //             validate: () {},
+  //           ),
+  //           Container(
+  //             child: StatefulBuilder(
+  //               builder: (BuildContext context, StateSetter dropDownState) {
+  //                 return Center(
+  //                   child: Container(
+  //                     alignment: Alignment.centerRight,
+  //                     // width: size.width / 2,
+  //                     padding: EdgeInsets.symmetric(horizontal: 20),
+  //                     height: 40,
+  //                     decoration: BoxDecoration(
+  //                       color: Colors.white,
+  //                       borderRadius: BorderRadius.circular(20),
+  //                       border: Border.all(color: Colors.grey),
+  //                     ),
+  //                     child: Container(
+  //                       child: InkWell(
+  //                         onTap: () => _modalBottomSheetMenu(context),
+  //                         child: Container(
+  //                           child: Row(
+  //                             children: [
+  //                               Text(
+  //                                 defaultstagename,
+  //                                 style: TextStyle(fontFamily: 'GE-light'),
+  //                               ),
+  //                               Spacer(),
+  //                               Icon(Icons.keyboard_arrow_down)
+  //                             ],
+  //                           ),
+  //                         ),
+  //                       ),
+  //                     ),
+  //                   ),
+  //                 );
+
+  //                 // DropdownButtonHideUnderline(
+  //                 //   child: DropdownButton(
+  //                 //     style: TextStyle(
+  //                 //         fontFamily: 'GE-medium', color: Colors.black),
+  //                 //     value: _add_data['stage'],
+  //                 //     hint: Text('المرحله الدراسية'),
+  //                 //     isExpanded: true,
+  //                 //     iconSize: 30,
+  //                 //     onChanged: (newval) {
+  //                 //       dropDownState(() {
+  //                 //         _add_data['stage'] = newval;
+  //                 //       });
+  //                 //     },
+  //                 //     icon: Icon(Icons.keyboard_arrow_down),
+  //                 //     items: Provider.of<StageManager>(context, listen: false)
+  //                 //         .stages!
+  //                 //         .map((item) => DropdownMenuItem(
+  //                 //               child: Text(item.name!),
+  //                 //               value: item.name!,
+  //                 //               onTap: () {
+  //                 //                 setState(() {
+  //                 //                   _add_data['id'] = item.id;
+  //                 //                   // print(_add_data['id']);
+  //                 //                 });
+  //                 //               },
+  //                 //             ))
+  //                 //         .toList(),
+  //                 //   ),
+  //                 // );
+  //               },
+  //             ),
+  //           ),
+  //           Spacer(),
+  //           Row(
+  //             mainAxisAlignment: MainAxisAlignment.center,
+  //             children: [
+  //               ElevatedButton(
+  //                   style: ElevatedButton.styleFrom(primary: kbackgroundColor1),
+  //                   onPressed: () {
+  //                     setState(() {
+  //                       text_value = yearController.text;
+  //                     });
+  //                     if (_add_data['stage'] == null) return;
+  //                     if (text_value == '') return;
+  //                     Provider.of<YearManager>(context, listen: false)
+  //                         .add_year(text_value, _add_data['id']!.toString())
+  //                         .then((value) => Navigator.of(context).pop())
+  //                         .then(
+  //                           (value) => setState(() {
+  //                             _isLoading = true;
+  //                           }),
+  //                         )
+  //                         .then((value) {
+  //                       Provider.of<YearManager>(context, listen: false)
+  //                           .getMoreData();
+  //                     }).then((value) {
+  //                       setState(() {
+  //                         _isLoading = false;
+  //                       });
+  //                     });
+  //                     // litems.add(text_value);
+  //                     yearController.clear();
+  //                   },
+  //                   child: Text(
+  //                     'اضافة',
+  //                     style: TextStyle(
+  //                         color: Colors.black, fontFamily: 'GE-medium'),
+  //                   )),
+  //               SizedBox(
+  //                 width: 20,
+  //               ),
+  //               ElevatedButton(
+  //                 style: ElevatedButton.styleFrom(primary: kbackgroundColor1),
+  //                 onPressed: () {
+  //                   Navigator.of(context).pop();
+  //                 },
+  //                 child: Text(
+  //                   'الغاء',
+  //                   style:
+  //                       TextStyle(color: Colors.black, fontFamily: 'GE-medium'),
+  //                 ),
+  //               ),
+  //             ],
+  //           )
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
+
+  void _modalBottomSheetMenu(BuildContext context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (builder) {
+          return Container(
+            height: 250.0,
+            color: Colors.transparent,
+            child: Column(
+              children: [
+                Container(
+                  height: 40,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: kbackgroundColor1,
+                  ),
+                  child: Center(
+                    child: Text(
+                      'المرحله الدراسيه',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontFamily: 'GE-bold',
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(20.0),
+                            topRight: Radius.circular(20.0))),
+                    child: Consumer<StageManager>(
+                      builder: (_, stagemanager, child) {
+                        if (stagemanager.stages!.isEmpty) {
+                          if (stagemanager.loading) {
+                            return Center(
+                                child: Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: CircularProgressIndicator(),
+                            ));
+                          } else if (stagemanager.error) {
+                            return Center(
+                                child: InkWell(
+                              onTap: () {
+                                stagemanager.setloading(true);
+                                stagemanager.seterror(false);
+                                Provider.of<StageManager>(context,
+                                        listen: false)
+                                    .getMoreData();
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Text("error please tap to try again"),
+                              ),
+                            ));
+                          }
+                        } else {
+                          return ListView.builder(
+                            controller: _sc,
+                            itemCount: stagemanager.stages!.length +
+                                (stagemanager.hasmore ? 1 : 0),
+                            itemBuilder: (BuildContext ctxt, int index) {
+                              if (index == stagemanager.stages!.length) {
+                                if (stagemanager.error) {
+                                  return Center(
+                                      child: InkWell(
+                                    onTap: () {
+                                      stagemanager.setloading(true);
+                                      stagemanager.seterror(false);
+                                      Provider.of<StageManager>(context,
+                                              listen: false)
+                                          .getMoreData();
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16),
+                                      child:
+                                          Text("error please tap to try again"),
+                                    ),
+                                  ));
+                                } else {
+                                  return Center(
+                                      child: Padding(
+                                    padding: const EdgeInsets.all(8),
+                                    child: CircularProgressIndicator(),
+                                  ));
+                                }
+                              }
+
+                              return GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    stage_id_selected = stagemanager
+                                        .stages![index].id
+                                        .toString();
+                                    defaultstagename =
+                                        stagemanager.stages![index].name!;
+                                  });
+                                  Navigator.pop(context);
+                                },
+                                child: ListTile(
+                                  title:
+                                      Text(stagemanager.stages![index].name!),
+                                ),
+                              );
+                            },
+                          );
+                        }
+                        return Container();
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        });
   }
 }

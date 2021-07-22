@@ -53,6 +53,7 @@ class _Teacher_FormState extends State<Teacher_Form> {
 
   @override
   void dispose() {
+    _isLoading = false;
     nameController.dispose();
     emailController.dispose();
     pass1Controller.dispose();
@@ -150,16 +151,18 @@ class _Teacher_FormState extends State<Teacher_Form> {
         cityId_selected = '';
         _years_ids = [];
         years_shown = [];
-      }).then((value) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                backgroundColor: Colors.green[300],
-                content: Center(
-                  child: Text(
-                    'تم اضافه المدرس بنجاح',
-                    style: TextStyle(fontFamily: 'GE-medium'),
-                  ),
-                ),
-                duration: Duration(seconds: 3),
-              )));
+      }).then(
+        (value) => ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.green[300],
+            content: Text(
+              'تم اضافه المدرس بنجاح',
+              style: TextStyle(fontFamily: 'GE-medium'),
+            ),
+            duration: Duration(seconds: 3),
+          ),
+        ),
+      );
     } on HttpException catch (error) {
       _showErrorDialog(error.toString());
     } catch (error) {
@@ -222,7 +225,7 @@ class _Teacher_FormState extends State<Teacher_Form> {
           .get_subjects()
           .then((_) =>
               Provider.of<YearManager>(context, listen: false).get_years())
-          .then((value) =>
+          .then((_) =>
               Provider.of<CitiesManager>(context, listen: false).get_cities())
           .then((_) {
         setState(() {
@@ -883,16 +886,19 @@ class _Teacher_FormState extends State<Teacher_Form> {
                     inputType: TextInputType.text,
                     focus: focus11,
                   ),
-                  TextButton(
-                    style: ButtonStyle(
-                        elevation: MaterialStateProperty.all(2),
-                        backgroundColor:
-                            MaterialStateProperty.all(kbuttonColor3)),
-                    onPressed: _submit,
-                    child: Text(
-                      'تسجيل',
-                      style:
-                          TextStyle(fontFamily: 'GE-Bold', color: Colors.black),
+                  Container(
+                    width: widget.size.width * .9,
+                    child: TextButton(
+                      style: ButtonStyle(
+                          elevation: MaterialStateProperty.all(2),
+                          backgroundColor:
+                              MaterialStateProperty.all(kbuttonColor3)),
+                      onPressed: _submit,
+                      child: Text(
+                        'تسجيل',
+                        style: TextStyle(
+                            fontFamily: 'GE-Bold', color: Colors.black),
+                      ),
                     ),
                   )
                 ],
