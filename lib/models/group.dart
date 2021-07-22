@@ -10,6 +10,7 @@ class GroupModel {
   SubjectModel? subject;
   String? day;
   String? time;
+  bool? choosen;
 
   GroupModel(
       {this.id,
@@ -18,9 +19,11 @@ class GroupModel {
       this.day,
       this.time,
       this.name,
-      this.subject});
+      this.subject,
+      this.choosen = false});
 
   GroupModel.fromJson(Map<String, dynamic> json) {
+    choosen = false;
     id = json['id'];
     name = json['name'];
     year = json['year'] != null ? new YearModel.fromJson(json['year']) : null;

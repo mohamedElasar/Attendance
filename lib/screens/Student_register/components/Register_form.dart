@@ -1,3 +1,4 @@
+import 'package:attendance/helper/httpexception.dart';
 import 'package:attendance/managers/Student_manager.dart';
 import 'package:attendance/managers/cities_manager.dart';
 import 'package:attendance/managers/group_manager.dart';
@@ -6,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_select/smart_select.dart';
+
+import '../../../constants.dart';
 
 // import 'contacts_widget.dart';
 
@@ -23,34 +26,121 @@ class Register_Form extends StatefulWidget {
 
 class _Register_FormState extends State<Register_Form> {
   final GlobalKey<FormState> _formKey = GlobalKey();
-  List<String> _groups_id = [];
-  void _submit() {
+  void _submit() async {
     final isValid = _formKey.currentState!.validate();
     if (!isValid) {
       return;
     }
-    Provider.of<StudentManager>(context, listen: false).add_student(
-        nameController.text,
-        emailController.text,
-        phonecontroller.text,
-        schoolController.text,
-        notesController.text,
-        _selectedCity.toString(),
-        _groups_id.join(','),
-        parentNameController.text,
-        relationController.text,
-        parentphoneController.text,
-        parentWhatsController.text,
-        _register_data['gender'],
-        studyTypeController.text,
-        _register_data['language'],
-        discountController.text,
-        barCodeController.text,
-        passwordcontroller.text,
-        confirmpasswordController.text);
+    if (_register_data['gender'] == null ||
+        _register_data['language'] == null ||
+        cityname == 'المحافظه' ||
+        _groups_shown.isEmpty) {
+      return;
+    }
+    _formKey.currentState!.save();
+    // print('asdasdasd');
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      await Provider.of<StudentManager>(context, listen: false)
+          .add_student(
+              nameController.text,
+              emailController.text,
+              phonecontroller.text,
+              schoolController.text,
+              notesController.text,
+              cityId_selected,
+              _groups_id.join(','),
+              parentNameController.text,
+              relationController.text,
+              parentphoneController.text,
+              parentWhatsController.text,
+              _register_data['gender'],
+              studyTypeController.text,
+              _register_data['language'],
+              discountController.text,
+              barCodeController.text,
+              passwordcontroller.text,
+              confirmpasswordController.text)
+          .then((_) {
+        nameController.text = '';
+        parentNameController.text = '';
+        relationController.text = '';
+        parentPhoneController.text = '';
+        parentWhatsController.text = '';
+        schoolController.text = '';
+        barCodeController.text = '';
+        groupController.text = '';
+        discountController.text = '';
+        languageController.text = '';
+        notesController.text = '';
+        emailController.text = '';
+        studyTypeController.text = '';
+        phonecontroller.text = '';
+        passwordcontroller.text = '';
+        confirmpasswordController.text = '';
+        parentphoneController.text = '';
+        _register_data['gender'] = null;
+        _register_data['language'] = null;
+        cityname = 'المحافظه';
+        _groups_id = [];
+        _groups_shown = [];
+      }).then((value) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                backgroundColor: Colors.green[300],
+                content: Center(
+                  child: Text(
+                    'تم اضافه الطالب بنجاح',
+                    style: TextStyle(fontFamily: 'GE-medium'),
+                  ),
+                ),
+                duration: Duration(seconds: 3),
+              )));
+    } on HttpException catch (error) {
+      _showErrorDialog(error.toString());
+    } catch (error) {
+      const errorMessage = 'حاول مره اخري';
+      _showErrorDialog(errorMessage);
+    }
+    setState(() {
+      _isLoading = false;
+    });
   }
 
-  var _isLoading = false;
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          'حدث خطا',
+          style: TextStyle(fontFamily: 'GE-Bold'),
+        ),
+        content: Text(
+          message,
+          style: TextStyle(fontFamily: 'AraHamah1964R-Bold'),
+        ),
+        actions: <Widget>[
+          Center(
+            child: TextButton(
+              style: ButtonStyle(
+                  backgroundColor:
+                      MaterialStateProperty.all(kbackgroundColor1)),
+              // color: kbackgroundColor1,
+              child: Text(
+                'حسنا',
+                style: TextStyle(fontFamily: 'GE-medium', color: Colors.black),
+              ),
+              onPressed: () {
+                Navigator.of(ctx).pop();
+              },
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  var _isLoading = true;
   Map<String, dynamic> _register_data = {
     // 'second_lang': '',
     'language': null,
@@ -59,6 +149,272 @@ class _Register_FormState extends State<Register_Form> {
     'track': null,
     'government': null,
   };
+  String cityname = 'المحافظه';
+  late String cityId_selected;
+  List<String> _groups_id = [];
+  List<String> _groups_shown = [];
+
+  void _modalBottomSheetMenu(BuildContext context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (builder) {
+          return Container(
+            height: 250.0,
+            color: Colors.transparent,
+            child: Column(
+              children: [
+                Container(
+                  height: 40,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: kbackgroundColor3,
+                  ),
+                  child: Center(
+                    child: Text(
+                      'المحافظه',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontFamily: 'GE-bold',
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(20.0),
+                            topRight: Radius.circular(20.0))),
+                    child: Consumer<CitiesManager>(
+                      builder: (_, citymanager, child) {
+                        if (citymanager.cities!.isEmpty) {
+                          if (citymanager.loading) {
+                            return Center(
+                                child: Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: CircularProgressIndicator(),
+                            ));
+                          } else if (citymanager.error) {
+                            return Center(
+                                child: InkWell(
+                              onTap: () {
+                                citymanager.setloading(true);
+                                citymanager.seterror(false);
+                                Provider.of<CitiesManager>(context,
+                                        listen: false)
+                                    .getMoreData();
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Text("error please tap to try again"),
+                              ),
+                            ));
+                          }
+                        } else {
+                          return ListView.builder(
+                            controller: _sc,
+                            itemCount: citymanager.cities!.length +
+                                (citymanager.hasmore ? 1 : 0),
+                            itemBuilder: (BuildContext ctxt, int index) {
+                              if (index == citymanager.cities!.length) {
+                                if (citymanager.error) {
+                                  return Center(
+                                      child: InkWell(
+                                    onTap: () {
+                                      citymanager.setloading(true);
+                                      citymanager.seterror(false);
+                                      Provider.of<CitiesManager>(context,
+                                              listen: false)
+                                          .getMoreData();
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16),
+                                      child:
+                                          Text("error please tap to try again"),
+                                    ),
+                                  ));
+                                } else {
+                                  return Center(
+                                      child: Padding(
+                                    padding: const EdgeInsets.all(8),
+                                    child: CircularProgressIndicator(),
+                                  ));
+                                }
+                              }
+
+                              return GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    cityId_selected = citymanager
+                                        .cities![index].id
+                                        .toString();
+                                    cityname = citymanager.cities![index].name!;
+                                  });
+                                  Navigator.pop(context);
+                                },
+                                child: ListTile(
+                                  title: Text(citymanager.cities![index].name!),
+                                ),
+                              );
+                            },
+                          );
+                        }
+                        return Container();
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        });
+  }
+
+  void _modalBottomSheetMenumulti(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (builder) {
+        return Container(
+          height: 250.0,
+          color: Colors.transparent,
+          child: Column(
+            children: [
+              Container(
+                height: 40,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: kbackgroundColor3,
+                ),
+                child: Center(
+                  child: Text(
+                    'المجموعات',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontFamily: 'GE-bold',
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(20.0),
+                          topRight: Radius.circular(20.0))),
+                  child: Consumer<GroupManager>(
+                    builder: (_, yearmanager, child) {
+                      if (yearmanager.groups.isEmpty) {
+                        if (yearmanager.loading) {
+                          return Center(
+                              child: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: CircularProgressIndicator(),
+                          ));
+                        } else if (yearmanager.error) {
+                          return Center(
+                              child: InkWell(
+                            onTap: () {
+                              yearmanager.setloading(true);
+                              yearmanager.seterror(false);
+                              Provider.of<GroupManager>(context, listen: false)
+                                  .getMoreData();
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Text("error please tap to try again"),
+                            ),
+                          ));
+                        }
+                      } else {
+                        return Column(
+                          children: [
+                            Expanded(
+                              child: ListView.builder(
+                                controller: _sc2,
+                                itemCount: yearmanager.groups.length +
+                                    (yearmanager.hasmore ? 1 : 0),
+                                itemBuilder: (BuildContext ctxt, int index) {
+                                  if (index == yearmanager.groups.length) {
+                                    if (yearmanager.error) {
+                                      return Center(
+                                          child: InkWell(
+                                        onTap: () {
+                                          yearmanager.setloading(true);
+                                          yearmanager.seterror(false);
+                                          Provider.of<GroupManager>(context,
+                                                  listen: false)
+                                              .getMoreData();
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(16),
+                                          child: Text(
+                                              "error please tap to try again"),
+                                        ),
+                                      ));
+                                    } else {
+                                      return Center(
+                                          child: Padding(
+                                        padding: const EdgeInsets.all(8),
+                                        child: CircularProgressIndicator(),
+                                      ));
+                                    }
+                                  }
+
+                                  return StatefulBuilder(
+                                    builder: (BuildContext context,
+                                        StateSetter checkboxstate) {
+                                      return ListTile(
+                                        title: Text(
+                                            yearmanager.groups[index].name!),
+                                        leading: Checkbox(
+                                          onChanged: (value) {
+                                            checkboxstate(() {
+                                              yearmanager
+                                                      .groups[index].choosen =
+                                                  !yearmanager
+                                                      .groups[index].choosen!;
+                                            });
+                                          },
+                                          value:
+                                              yearmanager.groups[index].choosen,
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+                            )
+                          ],
+                        );
+                      }
+                      return Container();
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    ).then((value) {
+      setState(() {
+        _groups_id = Provider.of<GroupManager>(context, listen: false)
+            .groups
+            .where((element) => element.choosen == true)
+            .toList()
+            .map((e) => e.id.toString())
+            .toList();
+        _groups_shown = Provider.of<GroupManager>(context, listen: false)
+            .groups
+            .where((element) => element.choosen == true)
+            .toList()
+            .map((e) => e.name.toString())
+            .toList();
+      });
+    });
+  }
 
   var nameController = TextEditingController();
   var parentNameController = TextEditingController();
@@ -79,11 +435,6 @@ class _Register_FormState extends State<Register_Form> {
   var parentphoneController = TextEditingController();
   late int _selectedCity;
 
-  List<S2Choice<String>> groups = [
-    S2Choice<String>(value: 'مجموعة الساعة 1', title: 'مجموعة الساعة 1'),
-    S2Choice<String>(value: 'مجموعة الساعة 2', title: 'مجموعة الساعة 2'),
-    S2Choice<String>(value: 'مجموعة الساعة 3', title: 'مجموعة الساعة 3'),
-  ];
   List<String> _groups = [];
   final focus1 = FocusNode();
   final focus2 = FocusNode();
@@ -99,36 +450,60 @@ class _Register_FormState extends State<Register_Form> {
   final focus12 = FocusNode();
   final focus13 = FocusNode();
   final focus14 = FocusNode();
-  var _isInit = true;
+  ScrollController _sc = new ScrollController();
+  ScrollController _sc2 = new ScrollController();
   @override
-  void didChangeDependencies() {
-    if (_isInit) {
-      setState(() {
-        _isLoading = true;
-      });
+  void dispose() {
+    _sc.dispose();
+    _sc2.dispose();
 
-      Provider.of<GroupManager>(context, listen: false)
-          .get_groups()
-          .then((_) =>
-              Provider.of<CitiesManager>(context, listen: false).get_cities())
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration.zero, () {
+      Provider.of<CitiesManager>(context, listen: false).resetlist();
+      Provider.of<GroupManager>(context, listen: false).resetlist();
+
+      Provider.of<CitiesManager>(context, listen: false)
+          .get_cities()
+          .then((value) =>
+              Provider.of<GroupManager>(context, listen: false).get_groups())
           .then((_) {
         setState(() {
           _isLoading = false;
         });
       });
-    }
-    _isInit = false;
-    super.didChangeDependencies();
+
+      _sc.addListener(
+        () {
+          if (_sc.position.pixels == _sc.position.maxScrollExtent) {
+            Provider.of<CitiesManager>(context, listen: false).getMoreData();
+          }
+        },
+      );
+      _sc2.addListener(
+        () {
+          if (_sc2.position.pixels == _sc2.position.maxScrollExtent) {
+            Provider.of<GroupManager>(context, listen: false).getMoreData();
+          }
+        },
+      );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return _isLoading
         ? Center(
-            child: CircularProgressIndicator(),
+            child: Container(
+              margin: EdgeInsets.all(50),
+              child: CircularProgressIndicator(),
+            ),
           )
         : Container(
-            height: widget.size.height * .8,
             width: widget.size.width,
             child: Form(
               key: _formKey,
@@ -152,19 +527,6 @@ class _Register_FormState extends State<Register_Form> {
                     focus: focus1,
                   ),
                   build_edit_field(
-                    item: 'phonenumber',
-                    hint: 'رقم التليفون',
-                    inputType: TextInputType.name,
-                    controller: phonecontroller,
-                    validate: (value) {
-                      if (value.isEmpty) {
-                        return '*';
-                      }
-                      return null;
-                    },
-                    focus: focus2,
-                  ),
-                  build_edit_field(
                     item: 'email',
                     hint: 'الايميل',
                     inputType: TextInputType.name,
@@ -176,40 +538,43 @@ class _Register_FormState extends State<Register_Form> {
                     },
                     focus: focus3,
                   ),
-                  Center(
-                    child: Container(
-                      width: widget.size.width * .9,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // Edit_Text(size: widget.size / 2, name: 'المجموعه'),
-                          build_edit_field(
-                              item: 'password',
-                              hint: 'password',
-                              small: true,
-                              inputType: TextInputType.name,
-                              controller: passwordcontroller,
-                              validate: (value) {
-                                if (value.isEmpty) {
-                                  return '*';
-                                }
-                              },
-                              focus: focus4),
-                          build_edit_field(
-                              item: 'confirm_password',
-                              hint: 'confirm_password',
-                              small: true,
-                              inputType: TextInputType.name,
-                              controller: confirmpasswordController,
-                              validate: (value) {
-                                if (value.isEmpty) {
-                                  return '*';
-                                }
-                              },
-                              focus: focus5),
-                        ],
-                      ),
-                    ),
+                  build_edit_field(
+                    item: 'password',
+                    hint: 'password',
+                    // small: true,
+                    inputType: TextInputType.name,
+                    controller: passwordcontroller,
+                    validate: (value) {
+                      if (value.isEmpty) {
+                        return '*';
+                      }
+                    },
+                    focus: focus4,
+                  ),
+                  build_edit_field(
+                      item: 'confirm_password',
+                      hint: 'confirm_password',
+                      // small: true,
+                      inputType: TextInputType.name,
+                      controller: confirmpasswordController,
+                      validate: (value) {
+                        if (value.isEmpty) {
+                          return '*';
+                        }
+                      },
+                      focus: focus5),
+                  build_edit_field(
+                    item: 'phonenumber',
+                    hint: 'رقم التليفون',
+                    inputType: TextInputType.name,
+                    controller: phonecontroller,
+                    validate: (value) {
+                      if (value.isEmpty) {
+                        return '*';
+                      }
+                      return null;
+                    },
+                    focus: focus2,
                   ),
                   Center(
                     child: Container(
@@ -282,129 +647,76 @@ class _Register_FormState extends State<Register_Form> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Center(
-                          child: Container(
-                        alignment: Alignment.centerRight,
-                        width: widget.size.width / 2 * .9,
-                        padding: EdgeInsets.symmetric(horizontal: 20),
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.grey),
-                        ),
                         child: Container(
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton(
-                              style: TextStyle(
-                                  fontFamily: 'GE-medium', color: Colors.black),
-                              value: _register_data['gender'],
-                              hint: Text('النوع'),
-                              isExpanded: true,
-                              iconSize: 30,
-                              onChanged: (newval) {
-                                setState(() {
-                                  _register_data['gender'] = newval.toString();
-                                });
-                              },
-                              icon: Icon(Icons.keyboard_arrow_down),
-                              items: ['أنثي', 'ذكر']
-                                  .map((item) => DropdownMenuItem(
-                                        child: Text(item),
-                                        value: item,
-                                      ))
-                                  .toList(),
+                          alignment: Alignment.centerRight,
+                          width: widget.size.width / 2 * .9,
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: Container(
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton(
+                                style: TextStyle(
+                                    fontFamily: 'GE-medium',
+                                    color: Colors.black),
+                                value: _register_data['gender'],
+                                hint: Text('النوع'),
+                                isExpanded: true,
+                                iconSize: 30,
+                                onChanged: (newval) {
+                                  setState(() {
+                                    _register_data['gender'] =
+                                        newval.toString();
+                                  });
+                                },
+                                icon: Icon(Icons.keyboard_arrow_down),
+                                items: ['أنثي', 'ذكر']
+                                    .map((item) => DropdownMenuItem(
+                                          child: Text(item),
+                                          value: item,
+                                        ))
+                                    .toList(),
+                              ),
                             ),
                           ),
                         ),
-                      )),
-                      build_edit_field(
-                          item: 'studyType',
-                          hint: 'الشعبه',
-                          small: true,
-                          inputType: TextInputType.name,
-                          controller: studyTypeController,
-                          validate: (value) {
-                            if (value.isEmpty) {
-                              return '*';
-                            }
-                          },
-                          focus: focus10)
-                    ],
-                  ),
-                  Center(
-                      child: Container(
-                    alignment: Alignment.centerRight,
-                    width: widget.size.width * .9,
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.grey),
-                    ),
-                    child: Container(
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton(
-                          style: TextStyle(
-                              fontFamily: 'GE-medium', color: Colors.black),
-                          value: _register_data['government'],
-                          hint: Text('المحافظة'),
-                          isExpanded: true,
-                          iconSize: 30,
-                          onChanged: (newval) {
-                            setState(() {
-                              _register_data['government'] = newval.toString();
-                            });
-                          },
-                          icon: Icon(Icons.keyboard_arrow_down),
-                          items:
-                              Provider.of<CitiesManager>(context, listen: false)
-                                  .cities!
-                                  .map((item) => DropdownMenuItem(
-                                        child: Text(item.name!),
-                                        value: item.name,
-                                        onTap: () {
-                                          setState(() {
-                                            _selectedCity = item.id!;
-                                          });
-                                        },
-                                      ))
-                                  .toList(),
+                      ),
+                      Center(
+                        child: Container(
+                          alignment: Alignment.centerRight,
+                          width: widget.size.width / 2 * .9,
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: Container(
+                            child: InkWell(
+                              onTap: () => _modalBottomSheetMenu(context),
+                              child: Container(
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      cityname,
+                                      style: TextStyle(fontFamily: 'GE-light'),
+                                    ),
+                                    Spacer(),
+                                    Icon(Icons.keyboard_arrow_down)
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  )),
-                  build_edit_field(
-                      item: 'school',
-                      hint: 'المدرسه',
-                      inputType: TextInputType.name,
-                      controller: schoolController,
-                      validate: (value) {
-                        if (value.isEmpty) {
-                          return '*';
-                        }
-                      },
-                      focus: focus11),
-                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    build_edit_field(
-                        item: 'code',
-                        hint: 'الكود الخاص',
-                        small: true,
-                        inputType: TextInputType.number,
-                        controller: barCodeController,
-                        validate: (value) {
-                          if (value.isEmpty) {
-                            return '*';
-                          }
-                        },
-                        focus: focus12),
-                    Container(
-                        child: Edit_Text(
-                      size: widget.size / 2,
-                      name: 'scan',
-                      changColor: true,
-                    )),
-                  ]),
+                    ],
+                  ),
                   Center(
                     child: Container(
                       alignment: Alignment.centerRight,
@@ -416,30 +728,109 @@ class _Register_FormState extends State<Register_Form> {
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(color: Colors.grey),
                       ),
-                      child: Container(
-                        child: SmartSelect<String>.multiple(
-                          title: 'المجموعة ',
-                          value: [],
-                          onChange: (selected) =>
-                              setState(() => _groups_id = selected.value),
-                          choiceItems:
-                              Provider.of<GroupManager>(context, listen: false)
-                                  .groups
-                                  .map(
-                                    (e) => S2Choice<String>(
-                                        value: e.id.toString(), title: e.name),
-                                  )
-                                  .toList(),
-                          modalType: S2ModalType.bottomSheet,
-                          tileBuilder: (context, state) {
-                            return S2Tile.fromState(
-                              state,
-                              isTwoLine: true,
-                            );
-                          },
+                      child: InkWell(
+                        onTap: () => _modalBottomSheetMenumulti(context),
+                        child: Container(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Container(
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        ' المجموعات الدراسيه ',
+                                        style:
+                                            TextStyle(fontFamily: 'GE-light'),
+                                      ),
+                                      Icon(Icons.keyboard_arrow_down)
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                  child: Container(
+                                width: widget.size.width * .9,
+                                child: ListView.builder(
+                                  itemCount: _groups_shown.length,
+                                  scrollDirection: Axis.horizontal,
+                                  itemBuilder: (context, index) => Row(
+                                    children: [
+                                      Text(
+                                        _groups_shown[index],
+                                        style:
+                                            TextStyle(fontFamily: 'GE-light'),
+                                      ),
+                                      Text(', ')
+                                    ],
+                                  ),
+                                ),
+                              ))
+                            ],
+                          ),
                         ),
                       ),
                     ),
+                  ),
+                  build_edit_field(
+                      item: 'studyType',
+                      hint: 'الشعبه',
+                      // small: true,
+                      inputType: TextInputType.name,
+                      controller: studyTypeController,
+                      validate: (value) {
+                        if (value.isEmpty) {
+                          return '*';
+                        }
+                      },
+                      focus: focus10),
+                  build_edit_field(
+                      item: 'school',
+                      hint: 'المدرسه',
+                      inputType: TextInputType.name,
+                      controller: schoolController,
+                      validate: (value) {
+                        if (value.isEmpty) {
+                          return '*';
+                        }
+                      },
+                      focus: focus11),
+                  Container(
+                    width: widget.size.width * .9,
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          build_edit_field(
+                              item: 'code',
+                              hint: 'الكود الخاص',
+                              small: true,
+                              inputType: TextInputType.number,
+                              controller: barCodeController,
+                              validate: (value) {
+                                if (value.isEmpty) {
+                                  return '*';
+                                }
+                              },
+                              focus: focus12),
+                          Center(
+                            child: Container(
+                              alignment: Alignment.centerRight,
+                              width: widget.size.width / 2 * .9,
+                              padding: EdgeInsets.symmetric(horizontal: 20),
+                              height: 40,
+                              decoration: BoxDecoration(),
+                              child: Container(
+                                child: Row(
+                                  children: [
+                                    Text('scan code  '),
+                                    Icon(Icons.camera_alt_outlined),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ]),
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -516,9 +907,17 @@ class _Register_FormState extends State<Register_Form> {
                         }
                       },
                       focus: focus14),
-                  InkWell(
-                    onTap: _submit,
-                    child: Icon(Icons.done),
+                  TextButton(
+                    style: ButtonStyle(
+                        elevation: MaterialStateProperty.all(2),
+                        backgroundColor:
+                            MaterialStateProperty.all(kbackgroundColor1)),
+                    onPressed: _submit,
+                    child: Text(
+                      'تسجيل',
+                      style:
+                          TextStyle(fontFamily: 'GE-Bold', color: Colors.black),
+                    ),
                   )
                 ],
               ),
@@ -537,10 +936,11 @@ class _Register_FormState extends State<Register_Form> {
   }) {
     return Center(
       child: Container(
+        margin: EdgeInsets.symmetric(vertical: 4),
         alignment: Alignment.centerRight,
         width: small ? widget.size.width * .9 / 2 : widget.size.width * .9,
         padding: EdgeInsets.symmetric(horizontal: 20),
-        height: 35,
+        height: 55,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),

@@ -219,11 +219,11 @@ class _Teacher_FormState extends State<Teacher_Form> {
       Provider.of<CitiesManager>(context, listen: false).resetlist();
 
       Provider.of<SubjectManager>(context, listen: false)
-          .getMoreData()
+          .get_subjects()
           .then((_) =>
-              Provider.of<YearManager>(context, listen: false).getMoreData())
+              Provider.of<YearManager>(context, listen: false).get_years())
           .then((value) =>
-              Provider.of<CitiesManager>(context, listen: false).getMoreData())
+              Provider.of<CitiesManager>(context, listen: false).get_cities())
           .then((_) {
         setState(() {
           _isLoading = false;
@@ -419,7 +419,7 @@ class _Teacher_FormState extends State<Teacher_Form> {
                               onTap: () {
                                 citymanager.setloading(true);
                                 citymanager.seterror(false);
-                                Provider.of<SubjectManager>(context,
+                                Provider.of<CitiesManager>(context,
                                         listen: false)
                                     .getMoreData();
                               },
@@ -442,7 +442,7 @@ class _Teacher_FormState extends State<Teacher_Form> {
                                     onTap: () {
                                       citymanager.setloading(true);
                                       citymanager.seterror(false);
-                                      Provider.of<SubjectManager>(context,
+                                      Provider.of<CitiesManager>(context,
                                               listen: false)
                                           .getMoreData();
                                     },
@@ -638,7 +638,10 @@ class _Teacher_FormState extends State<Teacher_Form> {
   Widget build(BuildContext context) {
     return _isLoading
         ? Center(
-            child: CircularProgressIndicator(),
+            child: Container(
+              margin: EdgeInsets.all(50),
+              child: CircularProgressIndicator(),
+            ),
           )
         : Container(
             // height: widget.size.height * .8,

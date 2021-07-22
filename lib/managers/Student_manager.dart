@@ -1,11 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:attendance/helper/httpexception.dart';
 
 import 'package:attendance/managers/Auth_manager.dart';
 import 'package:attendance/models/student.dart';
-import 'package:attendance/models/subject.dart';
-import 'package:attendance/models/teacher.dart';
-import 'package:attendance/models/year.dart';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -70,12 +69,13 @@ class StudentManager extends ChangeNotifier {
       );
       final responseData = json.decode(response.body);
       print(responseData);
-
-      // if (response.statusCode == 200) {}
-      // add exception
-
+      if (responseData['errors'] != null) {
+        print('here');
+        List<String> errors = [];
+        for (var value in responseData['errors'].values) errors.add(value[0]);
+        throw HttpException(errors.join('  '));
+      }
     } catch (error) {
-      print('object');
       throw (error);
     }
 

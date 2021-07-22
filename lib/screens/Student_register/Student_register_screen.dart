@@ -1,6 +1,8 @@
+import 'package:attendance/managers/App_State_manager.dart';
 import 'package:attendance/navigation/screens.dart';
 import 'package:attendance/screens/Admin_Login/components/Login_Form.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../constants.dart';
 import 'components/Register_form.dart';
 import 'components/title_with_register.dart';
@@ -36,15 +38,20 @@ class Student_Register_Screen extends StatelessWidget {
                 minRadius: 25,
                 backgroundImage: AssetImage('assets/images/pic.png')),
             SizedBox(
-              width: 70,
+              width: 30,
             ),
-            Icon(
-              Icons.save_rounded,
-              color: Colors.orange[200],
-              size: 40,
-            ),
-            SizedBox(
-              width: 20,
+            InkWell(
+              onTap: () {
+                Provider.of<AppStateManager>(context, listen: false)
+                    .go_to_Home();
+              },
+              child: RotatedBox(
+                quarterTurns: 2,
+                child: Icon(
+                  Icons.arrow_back,
+                  color: Colors.black,
+                ),
+              ),
             )
           ],
           elevation: 0,
