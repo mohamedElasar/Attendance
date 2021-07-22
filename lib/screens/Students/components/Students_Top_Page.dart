@@ -1,4 +1,6 @@
 import 'package:attendance/managers/Auth_manager.dart';
+import 'package:attendance/managers/stage_manager.dart';
+import 'package:attendance/managers/year_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -22,6 +24,7 @@ class Student_Top_Page extends StatelessWidget {
           ),
           Row(
             children: [
+              //test
               InkWell(
                 onTap: () {
                   Provider.of<Auth_manager>(context, listen: false).logout();
@@ -63,7 +66,7 @@ class Student_Top_Page extends StatelessWidget {
                             // suffixIcon: SvgPicture.asset("assets/icons/search.svg"),
                           ),
                         ),
-                      ),
+                      ), //test
                       Icon(Icons.search)
                     ],
                   ),

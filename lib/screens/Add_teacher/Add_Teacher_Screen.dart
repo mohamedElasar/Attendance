@@ -15,8 +15,11 @@ class Add_Teacher_Screeen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final GlobalKey<ScaffoldState> _scaffoldKey =
+        new GlobalKey<ScaffoldState>();
 
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: Center(
           child: Text(

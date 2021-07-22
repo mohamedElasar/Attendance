@@ -54,7 +54,9 @@ class Add_group_screen extends StatelessWidget {
         backgroundColor: Colors.white,
       ),
       backgroundColor: Colors.grey[300],
-      body: SingleChildScrollView(child: group_form(size: size)),
+      body: SingleChildScrollView(
+        child: group_form(size: size),
+      ),
     );
   }
 }

@@ -1,6 +1,8 @@
 import 'package:attendance/managers/App_State_manager.dart';
 import 'package:attendance/managers/Auth_manager.dart';
+import 'package:attendance/screens/Add_academic_year/Academic_year.dart';
 import 'package:attendance/screens/Add_group/Add_group_Screen.dart';
+import 'package:attendance/screens/Add_subject/Academic_subject.dart';
 import 'package:attendance/screens/Add_teacher/Add_Teacher_Screen.dart';
 import 'package:attendance/screens/Admin_Login/Admin_login_screen.dart';
 import 'package:attendance/screens/Filter_screen.dart/Fliter_Screen_6.dart';
@@ -57,6 +59,10 @@ class AppRouter extends RouterDelegate
           Filter_Screen_6.page(),
         if (authmanager.isLoggedIn && appStateManager.lessonModify)
           Modify_Lessons_screen.page(),
+        if (authmanager.isLoggedIn && appStateManager.subjectsModify)
+          Add_academic_subject.page(),
+        if (authmanager.isLoggedIn && appStateManager.yearsAdd)
+          Add_academic_year.page(),
         if (authmanager.isLoggedIn &&
             appStateManager.communicateStudents &&
             appStateManager.singleStudent)
@@ -79,6 +85,8 @@ class AppRouter extends RouterDelegate
         route.settings.name == Attendance_Screens.data_students ||
         route.settings.name == Attendance_Screens.group_registerpath ||
         route.settings.name == Attendance_Screens.student_registerpath ||
+        route.settings.name == Attendance_Screens.subjects_add ||
+        route.settings.name == Attendance_Screens.years_add ||
         route.settings.name == Attendance_Screens.teacher_registerpath) {
       appStateManager.go_to_Home();
     }

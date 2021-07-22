@@ -10,6 +10,8 @@ class AppStateManager extends ChangeNotifier {
   bool _communicate_students = false;
   bool _data_students = false;
   bool _lesson_modify = false;
+  bool _subjects_modify = false;
+  bool _years_add = false;
   // home screen state.. end
 
   // students page .. start
@@ -28,6 +30,8 @@ class AppStateManager extends ChangeNotifier {
   bool get communicateStudents => _communicate_students;
   bool get dataStudents => _data_students;
   bool get lessonModify => _lesson_modify;
+  bool get subjectsModify => _subjects_modify;
+  bool get yearsAdd => _years_add;
   // home screen end
 
   // students page .. start
@@ -73,6 +77,16 @@ class AppStateManager extends ChangeNotifier {
     notifyListeners();
   }
 
+  void modifySubjects() {
+    _subjects_modify = true;
+    notifyListeners();
+  }
+
+  void addYears() {
+    _years_add = true;
+    notifyListeners();
+  }
+
   void goToSingleStudent(bool value) {
     _single_student = value;
     notifyListeners();
@@ -90,6 +104,8 @@ class AppStateManager extends ChangeNotifier {
     _communicate_students = false;
     _data_students = false;
     _lesson_modify = false;
+    _subjects_modify = false;
+    _years_add = false;
     notifyListeners();
   }
 }

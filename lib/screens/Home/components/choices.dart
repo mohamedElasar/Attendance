@@ -166,14 +166,20 @@ class _ChoicesState extends State<Choices> {
                 Button_Container(
                   color: kbuttonColor2,
                   size: widget.size,
-                  text: 'حسابات',
-                  fnc: () {},
+                  text: 'المواد الدراسيه',
+                  fnc: () async {
+                    Provider.of<AppStateManager>(context, listen: false)
+                        .modifySubjects();
+                  },
                 ),
                 Button_Container(
                   color: kbackgroundColor1,
                   size: widget.size,
-                  text: 'شحن حصص',
-                  fnc: () {},
+                  text: 'السنوات الدراسيه',
+                  fnc: () async {
+                    Provider.of<AppStateManager>(context, listen: false)
+                        .addYears();
+                  },
                 ),
               ],
             ),
