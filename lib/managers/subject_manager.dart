@@ -72,6 +72,7 @@ class SubjectManager extends ChangeNotifier {
       // add exception
 
     } catch (error) {
+      print('errorsubjects');
       print(error);
     }
 

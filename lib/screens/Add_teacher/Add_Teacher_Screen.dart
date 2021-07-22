@@ -1,6 +1,8 @@
+import 'package:attendance/managers/App_State_manager.dart';
 import 'package:attendance/navigation/screens.dart';
 import 'package:attendance/screens/Add_teacher/components/Teacher_Form.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class Add_Teacher_Screeen extends StatelessWidget {
   static MaterialPage page() {
@@ -15,11 +17,11 @@ class Add_Teacher_Screeen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final GlobalKey<ScaffoldState> _scaffoldKey =
-        new GlobalKey<ScaffoldState>();
+    // final GlobalKey<ScaffoldState> _scaffoldKey =
+    //     new GlobalKey<ScaffoldState>();
 
     return Scaffold(
-      key: _scaffoldKey,
+      // key: _scaffoldKey,
       appBar: AppBar(
         title: Center(
           child: Text(
@@ -37,16 +39,31 @@ class Add_Teacher_Screeen extends StatelessWidget {
             backgroundImage: AssetImage('assets/images/pic2.png'),
           ),
           SizedBox(
-            width: 70,
+            width: 30,
           ),
-          Icon(
-            Icons.save_rounded,
-            color: Colors.orange[200],
-            size: 40,
-          ),
-          SizedBox(
-            width: 20,
+          InkWell(
+            onTap: () {
+              Provider.of<AppStateManager>(context, listen: false).go_to_Home();
+            },
+            child: RotatedBox(
+              quarterTurns: 2,
+              child: Icon(
+                Icons.arrow_back,
+                color: Colors.black,
+              ),
+            ),
           )
+          // SizedBox(
+          //   width: 70,
+          // ),
+          // Icon(
+          //   Icons.save_rounded,
+          //   color: Colors.orange[200],
+          //   size: 40,
+          // ),
+          // SizedBox(
+          //   width: 20,
+          // )
         ],
         elevation: 0,
         leading: Icon(

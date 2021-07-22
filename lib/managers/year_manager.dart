@@ -69,6 +69,7 @@ class YearManager extends ChangeNotifier {
       // add exception
 
     } catch (error) {
+      print('error years');
       print(error);
     }
 

@@ -80,6 +80,7 @@ class _Teacher_FormState extends State<Teacher_Form> {
     focus11.dispose();
     _sc.dispose();
     _sc2.dispose();
+    _sc3.dispose();
     super.dispose();
   }
 
@@ -151,9 +152,11 @@ class _Teacher_FormState extends State<Teacher_Form> {
         years_shown = [];
       }).then((value) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 backgroundColor: Colors.green[300],
-                content: Text(
-                  'تم اضافه المدرس بنجاح',
-                  style: TextStyle(fontFamily: 'GE-medium'),
+                content: Center(
+                  child: Text(
+                    'تم اضافه المدرس بنجاح',
+                    style: TextStyle(fontFamily: 'GE-medium'),
+                  ),
                 ),
                 duration: Duration(seconds: 3),
               )));

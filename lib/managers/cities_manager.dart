@@ -38,6 +38,7 @@ class CitiesManager extends ChangeNotifier {
       // add exception
 
     } catch (error) {
+      print('errorcities');
       print(error);
     }
 
