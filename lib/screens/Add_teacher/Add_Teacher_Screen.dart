@@ -1,7 +1,18 @@
+import 'package:attendance/managers/teacher_manager.dart';
+import 'package:attendance/models/create_teacher.dart';
+import 'package:attendance/navigation/screens.dart';
 import 'package:attendance/screens/Add_teacher/components/Teacher_Form.dart';
 import 'package:flutter/material.dart';
 
 class Add_Teacher_Screeen extends StatelessWidget {
+  static MaterialPage page() {
+    return MaterialPage(
+      name: Attendance_Screens.teacher_registerpath,
+      key: ValueKey(Attendance_Screens.teacher_registerpath),
+      child: const Add_Teacher_Screeen(),
+    );
+  }
+
   const Add_Teacher_Screeen({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -44,7 +55,10 @@ class Add_Teacher_Screeen extends StatelessWidget {
         backgroundColor: Colors.white,
       ),
       backgroundColor: Colors.grey[300],
-      body: SingleChildScrollView(child: Teacher_Form(size: size)),
+      body: SingleChildScrollView(
+          child: Teacher_Form(
+        size: size,
+      )),
     );
   }
 }

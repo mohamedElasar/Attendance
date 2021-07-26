@@ -1,4 +1,8 @@
+import 'package:attendance/helper/httpexception.dart';
+import 'package:attendance/managers/App_State_manager.dart';
+import 'package:attendance/managers/Auth_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../constants.dart';
 
@@ -17,7 +21,7 @@ class _Login_FormState extends State<Login_Form> {
 
   bool _rememberme = false;
   Map<String, String> _authData = {
-    'Username': '',
+    'Email': '',
     'Password': '',
   };
 
@@ -36,7 +40,7 @@ class _Login_FormState extends State<Login_Form> {
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -44,7 +48,53 @@ class _Login_FormState extends State<Login_Form> {
     setState(() {
       _isLoading = true;
     });
-    // log user in
+    try {
+      await Provider.of<Auth_manager>(context, listen: false).login(
+          _authData['Email'].toString(), _authData['Password'].toString());
+      if (_rememberme)
+        await Provider.of<Auth_manager>(context, listen: false).rememberMe();
+    } on HttpException catch (error) {
+      var errorMessage = 'These credentials do not match our records';
+      if (error.toString().contains('credentials do not match'))
+        _showErrorDialog('البيانات غير صحيحه');
+    } catch (error) {
+      const errorMessage = 'حاول مره اخري';
+      _showErrorDialog(errorMessage);
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          'حدث خطا',
+          style: TextStyle(fontFamily: 'GE-Bold'),
+        ),
+        content: Text(
+          message,
+          style: TextStyle(fontFamily: 'GE-medium'),
+        ),
+        actions: <Widget>[
+          Center(
+            child: FlatButton(
+              color: kbackgroundColor1,
+              child: Text(
+                'حسنا',
+                style: TextStyle(fontFamily: 'GE-medium'),
+              ),
+              onPressed: () {
+                Navigator.of(ctx).pop();
+              },
+            ),
+          )
+        ],
+      ),
+    );
   }
 
   @override
@@ -56,8 +106,8 @@ class _Login_FormState extends State<Login_Form> {
           Container(
             alignment: Alignment.center,
             margin: EdgeInsets.symmetric(horizontal: 20),
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            height: 54,
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 3),
+            height: 55,
             decoration: BoxDecoration(
               border: Border.all(color: Colors.black),
               color: kTextColor1,
@@ -67,16 +117,31 @@ class _Login_FormState extends State<Login_Form> {
               textAlign: TextAlign.left,
               textDirection: TextDirection.ltr,
               onEditingComplete: () => myFocusNode.requestFocus(),
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return 'Please type your Email *';
+                }
+                if (!value.contains('@')) {
+                  return 'Please enter a valid email address *';
+                }
+                return null;
+              },
               onSaved: (value) {
-                _authData['Username'] = value!;
+                _authData['Email'] = value!;
               },
               keyboardType: TextInputType.text,
               onChanged: (value) {},
               decoration: InputDecoration(
-                hintText: "Username",
-                hintStyle: TextStyle(
-                  color: kTextColor2.withOpacity(1),
+                focusedErrorBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                errorStyle: TextStyle(
+                  textBaseline: TextBaseline.ideographic,
+                  decoration: TextDecoration.none,
+                  fontSize: 12,
                 ),
+                hintText: "Email",
+                hintStyle:
+                    TextStyle(color: kTextColor2.withOpacity(1), fontSize: 15),
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
                 // suffixIcon: SvgPicture.asset("assets/icons/search.svg"),
@@ -89,8 +154,8 @@ class _Login_FormState extends State<Login_Form> {
           Container(
             alignment: Alignment.center,
             margin: EdgeInsets.symmetric(horizontal: 20),
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            height: 54,
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 3),
+            height: 55,
             decoration: BoxDecoration(
               border: Border.all(color: Colors.black),
               color: Colors.white,
@@ -103,15 +168,31 @@ class _Login_FormState extends State<Login_Form> {
               onSaved: (value) {
                 _authData['password'] = value!;
               },
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return 'Please type your password *';
+                }
+
+                return null;
+              },
               obscureText: true,
               keyboardType: TextInputType.text,
               scrollPadding: const EdgeInsets.only(bottom: 32.0),
-              onChanged: (value) {},
+              onChanged: (value) {
+                _authData['Password'] = value;
+              },
               decoration: InputDecoration(
-                hintText: "Password",
-                hintStyle: TextStyle(
-                  color: kTextColor2.withOpacity(1),
+                focusedErrorBorder: InputBorder.none,
+
+                errorStyle: TextStyle(
+                  textBaseline: TextBaseline.ideographic,
+                  decoration: TextDecoration.none,
+                  fontSize: 12,
                 ),
+                errorBorder: InputBorder.none,
+                hintText: "Password",
+                hintStyle:
+                    TextStyle(color: kTextColor2.withOpacity(1), fontSize: 15),
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
                 // suffixIcon: SvgPicture.asset("assets/icons/search.svg"),
@@ -140,24 +221,23 @@ class _Login_FormState extends State<Login_Form> {
                 child: CircularProgressIndicator())
           else
             TextButton(
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: Text(
-                  'Log In',
-                  style: TextStyle(fontSize: 20),
-                ),
-              ),
-              style: TextButton.styleFrom(
-                primary: kTextColor1,
-                backgroundColor: kbuttonColor1,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(20),
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Text(
+                    'Log In',
+                    style: TextStyle(fontSize: 20),
                   ),
                 ),
-              ),
-              onPressed: _submit,
-            )
+                style: TextButton.styleFrom(
+                  primary: kTextColor1,
+                  backgroundColor: kbuttonColor1,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(20),
+                    ),
+                  ),
+                ),
+                onPressed: () => _submit())
         ],
       ),
     );
